@@ -1,7 +1,7 @@
 {
-  "name": "@kensho/skeleton",
+  "name": "@kensho/bee-vis",
   "version": "0.0.0",
-  "description": "💀",
+  "description": "🐝",
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server",
@@ -10,8 +10,8 @@
     "fix": "eslint --ext=tsx --fix .",
     "serve": "serve -s"
   },
-  "repository": "https://github.kensho.com/nabeel/skeleton.git",
-  "bugs": "https://github.kensho.com/nabeel/skeleton/issues",
+  "repository": "https://github.kensho.com/rupayan-neogy/bee-vis.git",
+  "bugs": "https://github.kensho.com/rupayan-neogy/bee-vis/issues",
   "author": "Kensho Technologies, LLC.",
   "license": "UNLICENSED",
   "dependencies": {
