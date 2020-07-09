@@ -4,6 +4,74 @@ import path from 'path'
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {csvParseRows} from 'd3-dsv'
 
+// Map from state name => abbreviation
+const STATE_NAME_MAP: Record<string, string> = {
+  Alabama: 'AL',
+  Alaska: 'AK',
+  'American Samoa': 'AS',
+  Arizona: 'AZ',
+  Arkansas: 'AR',
+  California: 'CA',
+  Colorado: 'CO',
+  Connecticut: 'CT',
+  Delaware: 'DE',
+  'District Of Columbia': 'DC',
+  'Federated States Of Micronesia': 'FM',
+  Florida: 'FL',
+  Georgia: 'GA',
+  Guam: 'GU',
+  Hawaii: 'HI',
+  Idaho: 'ID',
+  Illinois: 'IL',
+  Indiana: 'IN',
+  Iowa: 'IA',
+  Kansas: 'KS',
+  Kentucky: 'KY',
+  Louisiana: 'LA',
+  Maine: 'ME',
+  'Marshall Islands': 'MH',
+  Maryland: 'MD',
+  Massachusetts: 'MA',
+  Michigan: 'MI',
+  Minnesota: 'MN',
+  Mississippi: 'MS',
+  Missouri: 'MO',
+  Montana: 'MT',
+  Nebraska: 'NE',
+  Nevada: 'NV',
+  'New Hampshire': 'NH',
+  'New Jersey': 'NJ',
+  'New Mexico': 'NM',
+  'New York': 'NY',
+  'North Carolina': 'NC',
+  'North Dakota': 'ND',
+  'Northern Mariana Islands': 'MP',
+  Ohio: 'OH',
+  Oklahoma: 'OK',
+  Oregon: 'OR',
+  Palau: 'PW',
+  Pennsylvania: 'PA',
+  'Puerto Rico': 'PR',
+  'Rhode Island': 'RI',
+  'South Carolina': 'SC',
+  'South Dakota': 'SD',
+  Tennessee: 'TN',
+  Texas: 'TX',
+  Utah: 'UT',
+  Vermont: 'VT',
+  'Virgin Islands': 'VI',
+  Virginia: 'VA',
+  Washington: 'WA',
+  'West Virginia': 'WV',
+  Wisconsin: 'WI',
+  Wyoming: 'WY',
+  // Special cases
+  'Other States': 'Other',
+  Oth: 'Other',
+  Sts: 'Other',
+  'United States': 'US',
+}
+
 async function getCSVFiles(dir: string): Promise<{name: string; data: Buffer}[]> {
   const basePath = path.resolve(__dirname, dir)
   const files = await new Promise<{name: string; data: Buffer}[]>((resolve, reject) => {
@@ -34,6 +102,11 @@ interface Table {
   rows: string[][]
 }
 
+interface MergedTable {
+  columns: string[]
+  rows: (string | null)[][]
+}
+
 function getEmptyTable(): Table {
   return {
     metadata: {
@@ -46,7 +119,6 @@ function getEmptyTable(): Table {
   }
 }
 
-// TODO: "2/", etc represents superscript for footnotes
 /* eslint-disable no-param-reassign */
 function parseRow(table: Table, row: string[]): undefined {
   // how to infer the type of data by the column key?
@@ -71,8 +143,8 @@ function parseRow(table: Table, row: string[]): undefined {
       return
     }
     case 'd': {
-      // Ignore empty data rows
-      if (row[2] === '') return
+      // Ignore empty data rows and a hack for 'Other' empty rows
+      if (row[2] === '' || row.slice(3).join('').length === 0) return
       table.rows.push(row.slice(2))
       return
     }
@@ -93,6 +165,43 @@ function getYearFromFilename(filename: string): string {
   return filename.split('_')[0]
 }
 
+function stripFootnoteMarker(value: string): string {
+  return value.replace(/(\d\/)/g, '').trim()
+}
+
+function normalizeState(state: string): string {
+  const stripped = stripFootnoteMarker(state)
+  return STATE_NAME_MAP[stripped] ?? stripped
+}
+
+// Normalize for comparision
+function normalizeUnit(unit: string | undefined): string | null {
+  return unit ? unit.replace(/[()]/g, '').trim().toLowerCase() : null
+}
+
+function normalizeUnits(
+  tableUnits: (string | undefined)[],
+  standardUnits: (string | undefined)[],
+  row: string[]
+): string[] {
+  const normalizedStandardUnits = standardUnits.map(normalizeUnit)
+  const normalizedTableUnits = tableUnits.map(normalizeUnit)
+
+  return row.map((value, idx) => {
+    if (normalizedTableUnits[idx] !== normalizedStandardUnits[idx]) {
+      // Try to convert
+      const from = normalizedTableUnits[idx]
+      const to = normalizedStandardUnits[idx]
+
+      if (from === 'dollars' && to === 'cents') {
+        return (Number(value) * 100).toString()
+      }
+      return value
+    }
+    return value
+  })
+}
+
 async function parseCSVs(dir: string): Promise<Table[]> {
   const tables: Table[] = []
   const files = await getCSVFiles(dir)
@@ -105,26 +214,28 @@ async function parseCSVs(dir: string): Promise<Table[]> {
   return tables
 }
 
-interface MergedTable {
-  columns: string[]
-  rows: (string | null)[][]
-}
-
 async function generateMergedTableJSON(dir: string): Promise<MergedTable> {
   const tables = await parseCSVs(dir)
-  // TODO: merge units
-  const cleanedColumns = tables.map((table) =>
-    table.columns.map((column) =>
-      column.value.endsWith('/') ? column.value.slice(0, column.value.length - 3) : column.value
-    )
-  )
-  const yearAnnotatedRows = tables.map((table) =>
-    table.rows.map((row) => [...row, table.metadata.year])
+
+  // Use the units of the first table as the standard.
+  const tableUnits = tables[0].columns.map((col) => col.unit)
+  const tableColumnNames = tables[0].columns.map((col) => stripFootnoteMarker(col.value))
+
+  const normalizedTableRows = tables.map((table) =>
+    table.rows.map((row) => {
+      const normalizedState = normalizeState(row[0])
+      const normalizedUnitValues = normalizeUnits(
+        table.columns.map((col) => col.unit),
+        tableUnits,
+        row
+      )
+      return [normalizedState, ...normalizedUnitValues.slice(1), table.metadata.year]
+    })
   )
 
   const mergedTable: MergedTable = {
-    columns: [...cleanedColumns[0], 'Year'],
-    rows: yearAnnotatedRows.flat(),
+    columns: [...tableColumnNames, 'Year'],
+    rows: normalizedTableRows.flat(),
   }
 
   return mergedTable
@@ -139,19 +250,19 @@ async function runner(): Promise<void> {
 
   writeFile(
     path.resolve(__dirname, '../merged-data/stressors.json'),
-    JSON.stringify(stressors),
+    JSON.stringify(stressors, null, 2),
     {flag: 'w'},
     noop
   )
   writeFile(
     path.resolve(__dirname, '../merged-data/numbers.json'),
-    JSON.stringify(numbers),
+    JSON.stringify(numbers, null, 2),
     {flag: 'w'},
     noop
   )
   writeFile(
     path.resolve(__dirname, '../merged-data/honey.json'),
-    JSON.stringify(honey),
+    JSON.stringify(honey, null, 2),
     {flag: 'w'},
     noop
   )
