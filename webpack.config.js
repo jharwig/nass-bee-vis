@@ -24,6 +24,15 @@ module.exports = (env) => {
             options: {envName: mode},
           },
         },
+        {
+          test: /\.csv$/,
+          loader: 'csv-loader',
+          options: {
+            dynamicTyping: true,
+            header: true,
+            skipEmptyLines: true,
+          },
+        },
       ],
     },
     performance: {hints: false},

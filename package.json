@@ -19,6 +19,7 @@
     "@types/react": "^16.9.35",
     "@types/react-dom": "^16.9.8",
     "d3-geo": "^1.12.1",
+    "emotion": "^10.0.27",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-simple-maps": "^2.1.2"
@@ -30,6 +31,7 @@
     "@types/webpack-env": "^1.15.2",
     "babel-loader": "^8.1.0",
     "babel-preset-kensho": "^12.1.1",
+    "csv-loader": "^3.0.3",
     "eslint": "^6.8.0",
     "eslint-config-kensho": "^16.3.0",
     "html-webpack-plugin": "^4.3.0",
