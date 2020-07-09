@@ -3,6 +3,8 @@ import {ComposableMap, Geographies, Geography} from 'react-simple-maps'
 import {scaleLinear} from 'd3-scale'
 import {extent} from 'd3-array'
 
+import statesJsonMap from './states.json'
+
 const geoUrl = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
 
 const baseColor = 'lightgray'
@@ -10,29 +12,44 @@ const scale = scaleLinear().range([baseColor, 'steelblue'])
 
 // Original example is here: https://www.react-simple-maps.io/examples/usa-counties-choropleth-quantize/
 function MapChart2({data}): JSX.Element {
-  const [field, setField] = useState('Yield-per-colony')
+  const [filteredData, setFilteredData] = useState([])
 
   useEffect(() => {
-    scale.domain(extent(data, (d) => d[field]))
-  }, [data, field])
+    setFilteredData(data.filter((d) => !['other', 'US'].includes(d[0])))
+  }, [data])
 
-  const states = ({geographies}) =>
-    geographies.map((geo) => {
-      const cur = data.find((d) => d.State === geo.properties.name)
-      return (
-        <Geography
-          key={geo.rsmKey}
-          stroke="#FFF"
-          geography={geo}
-          fill={cur ? scale(cur[field]) : baseColor}
-        />
-      )
-    })
+  const [version, setVersion] = useState(1)
+  useEffect(() => {
+    if (!filteredData.length) return
+    scale.domain(extent(filteredData, (d) => d[2]))
+    console.log(scale.domain())
+    setVersion((v) => v + 1)
+  }, [filteredData])
+
+  const states = React.useCallback(
+    ({geographies}) =>
+      geographies.map((geo) => {
+        const cur = filteredData.find((d) => statesJsonMap[d[0]] === geo.properties.name)
+        return (
+          <Geography
+            key={geo.rsmKey}
+            stroke="#FFF"
+            geography={geo}
+            fill={cur ? scale(cur[2]) : baseColor}
+          />
+        )
+      }),
+    [filteredData]
+  )
+
+  if (!filteredData.length) return null
 
   return (
-    <ComposableMap projection="geoAlbersUsa">
-      <Geographies geography={geoUrl}>{states}</Geographies>
-    </ComposableMap>
+    <>
+      <ComposableMap key={version} projection="geoAlbersUsa">
+        <Geographies geography={geoUrl}>{states}</Geographies>
+      </ComposableMap>
+    </>
   )
 }
 

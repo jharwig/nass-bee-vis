@@ -8,6 +8,7 @@ export interface Filter {
 }
 
 interface FiltersProps {
+  states: string[]
   filter: Filter
   setFilter: React.SetStateAction<Filter>
 }
@@ -16,7 +17,7 @@ const label = css(`
 display: block;
 `)
 
-function Filters({filter, setFilter}: FiltersProps): JSX.Element {
+function Filters({states, filter, setFilter}: FiltersProps): JSX.Element {
   const onChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const {file, index} = event.target.dataset
     if (file && index) {
@@ -50,7 +51,15 @@ function Filters({filter, setFilter}: FiltersProps): JSX.Element {
       <label>
         State
         <select value={filter.state} onChange={onChangeState}>
-          <option value="US">United States</option>
+          <option value="US">US</option>
+          {states.map(
+            (state) =>
+              state !== 'US' && (
+                <option key={state} value={state}>
+                  {state}
+                </option>
+              )
+          )}
         </select>
       </label>
       {filterDefs.map(({group, items}) => (
@@ -62,7 +71,7 @@ function Filters({filter, setFilter}: FiltersProps): JSX.Element {
                 type="radio"
                 name="column"
                 onChange={onChange}
-                checked={index === filter.index}
+                checked={filter.file === file && index === filter.index}
                 data-file={file}
                 data-index={index}
               />{' '}

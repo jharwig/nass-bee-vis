@@ -1,21 +1,21 @@
 import * as React from 'react'
 import {VictoryChart, VictoryLine} from 'victory'
 
-import honey from '../merged-data/honey.json'
+const dateForYearField = (d) => {
+  const [year, quarter] = d[1].split('-')
+  if (quarter) {
+    const month = {Q1: 0, Q2: 3, Q3: 6, Q4: 9}
+    return new Date(year, month[quarter])
+  }
+  return new Date(year)
+}
 
-import {Filter} from './Filters'
-// import numbers from '../merged-data/numbers.json'
-// import stressors from '../merged-data/stressors.json'
-
-function LineChart({filter}: {filter: Filter}): JSX.Element {
-  console.log(filter)
-  return null
-  // const data = honey.rows.filter((row) => row[0].startsWith(filter.state))
-  // return (
-  // <VictoryChart>
-  // <VictoryLine data={data} x={(d) => new Date(d[7])} y={(d) => Number(d[1])} />
-  // </VictoryChart>
-  // )
+function LineChart({data}: {data: [string, string, number][]}): JSX.Element {
+  return (
+    <VictoryChart>
+      <VictoryLine data={data} x={dateForYearField} y={2} />
+    </VictoryChart>
+  )
 }
 
 export default LineChart
