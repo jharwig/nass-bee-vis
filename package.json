@@ -1,0 +1,41 @@
+{
+  "name": "@kensho/skeleton",
+  "version": "0.0.0",
+  "description": "💀",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server",
+    "build": "rm -rf dist && webpack --env production",
+    "test": "tsc && eslint --ext=tsx .",
+    "fix": "eslint --ext=tsx --fix .",
+    "serve": "serve -s"
+  },
+  "repository": "https://github.kensho.com/nabeel/skeleton.git",
+  "bugs": "https://github.kensho.com/nabeel/skeleton/issues",
+  "author": "Kensho Technologies, LLC.",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@emotion/core": "^10.0.28",
+    "@types/react": "^16.9.35",
+    "@types/react-dom": "^16.9.8",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.6",
+    "@kensho/tsconfig": "^1.0.0",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.3.1",
+    "@types/webpack-env": "^1.15.2",
+    "babel-loader": "^8.1.0",
+    "babel-preset-kensho": "^12.1.1",
+    "eslint": "^6.8.0",
+    "eslint-config-kensho": "^16.3.0",
+    "html-webpack-plugin": "^4.3.0",
+    "prettier": "^2.0.5",
+    "serve": "^11.3.0",
+    "typescript": "^3.9.2",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.11.0"
+  }
+}

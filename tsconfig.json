@@ -1,0 +1,8 @@
+{
+  "extends": "@kensho/tsconfig",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": false,
+    "noEmit": true
+  }
+}
