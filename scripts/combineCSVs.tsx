@@ -193,9 +193,10 @@ function normalizeUnits(
       const from = normalizedTableUnits[idx]
       const to = normalizedStandardUnits[idx]
 
-      if (from === 'dollars' && to === 'cents') {
-        return (Number(value) * 100).toString()
-      }
+      console.warn(`Table column unit (${from}) differ from standard (${to})`)
+      if (from === 'dollars' && to === 'cents') return (Number(value) * 100).toString()
+      if (from === 'cents' && to === 'dollars') return (Number(value) / 100).toString()
+
       return value
     }
     return value
@@ -217,9 +218,11 @@ async function parseCSVs(dir: string): Promise<Table[]> {
 async function generateMergedTableJSON(dir: string): Promise<MergedTable> {
   const tables = await parseCSVs(dir)
 
-  // Use the units of the first table as the standard.
-  const tableUnits = tables[0].columns.map((col) => col.unit)
-  const tableColumnNames = tables[0].columns.map((col) => stripFootnoteMarker(col.value))
+  // Use the units of the last table as the standard.
+  const tableUnits = tables[tables.length - 1].columns.map((col) => col.unit)
+  const tableColumnNames = tables[tables.length - 1].columns.map((col) =>
+    stripFootnoteMarker(col.value)
+  )
 
   const normalizedTableRows = tables.map((table) =>
     table.rows.map((row) => {

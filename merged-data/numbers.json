@@ -1,13 +1,13 @@
 {
   "columns": [
     "State",
-    "January 1 number of colonies",
-    "January-March Maximum colonies",
-    "January-March Lost colonies",
-    "January-March Percent lost",
-    "January-March Added colonies",
-    "January-March Renovated colonies",
-    "January-March Percent renovated",
+    "October 1 colonies",
+    "October-December Maximum colonies",
+    "October-December Lost colonies",
+    "October-December Percent lost",
+    "October-December Added colonies",
+    "October-December Renovated colonies",
+    "October-December Percent renovated",
     "Year"
   ],
   "rows": [
