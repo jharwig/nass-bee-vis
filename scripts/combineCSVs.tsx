@@ -90,7 +90,7 @@ function parseRow(table: Table, row: string[]): undefined {
 /* eslint-enable no-param-reassign */
 
 function getYearFromFilename(filename: string): string {
-  return filename.split('-')[0]
+  return filename.split('_')[0]
 }
 
 async function parseCSVs(dir: string): Promise<Table[]> {

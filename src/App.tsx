@@ -36,7 +36,7 @@ export default function App(): JSX.Element {
       <article css={charts}>
         <figure>
           <LineChart />
-          <figcaption>Bee Data by Year</figcaption>
+          <figcaption>Honey Bee Colonies by Year</figcaption>
         </figure>
         <figure>
           <MapChart />
