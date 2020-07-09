@@ -5,6 +5,7 @@ import data from '../clean-data/honey2019.csv'
 
 import LineChart from './LineChart'
 import MapChart from './MapChart'
+import MapChart2 from './MapChart2'
 import Filters from './Filters'
 
 const container = css(`
@@ -25,7 +26,6 @@ const charts = css(`grid-area: charts`)
 const filters = css(`grid-area: filters`)
 
 export default function App(): JSX.Element {
-  console.log(data)
   return (
     <main css={container}>
       <header css={header}>
@@ -41,6 +41,9 @@ export default function App(): JSX.Element {
         <figure>
           <MapChart />
           <figcaption>Bee Data by State</figcaption>
+        </figure>
+        <figure>
+          <MapChart2 data={data} />
         </figure>
       </article>
       <aside css={filters}>
