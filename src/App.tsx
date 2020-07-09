@@ -1,12 +1,20 @@
 import * as React from 'react'
 import {css} from '@emotion/core'
 
-import data from '../clean-data/honey2019.csv'
+import honey from '../merged-data/honey.json'
+import numbers from '../merged-data/numbers.json'
+import stressors from '../merged-data/stressors.json'
 
 import LineChart from './LineChart'
 import MapChart from './MapChart'
 import MapChart2 from './MapChart2'
-import Filters from './Filters'
+import Filters, {Filter} from './Filters'
+
+const files = {
+  honey,
+  numbers,
+  stressors,
+}
 
 const container = css(`
   width: 100vw;
@@ -26,6 +34,13 @@ const charts = css(`grid-area: charts`)
 const filters = css(`grid-area: filters`)
 
 export default function App(): JSX.Element {
+  const [filter, setFilter] = React.useState<Filter>({state: 'US', file: 'honey', index: 1})
+
+  const [data, setData] = React.useState()
+  React.useEffect(() => {
+    console.log(filter, files[filter.file].rows)
+  }, [filter])
+
   return (
     <main css={container}>
       <header css={header}>
@@ -35,19 +50,18 @@ export default function App(): JSX.Element {
       </header>
       <article css={charts}>
         <figure>
-          <LineChart />
-          <figcaption>Honey Bee Colonies by Year</figcaption>
+          <LineChart filter={filter} />
+          <figcaption>
+            {filter && `${filter.file} ${filter.index} by Year for ${filter.state}`}
+          </figcaption>
         </figure>
         <figure>
-          <MapChart />
           <figcaption>Bee Data by State</figcaption>
         </figure>
-        <figure>
-          <MapChart2 data={data} />
-        </figure>
+        <figure />
       </article>
       <aside css={filters}>
-        <Filters />
+        <Filters filter={filter} setFilter={filter} />
       </aside>
     </main>
   )
