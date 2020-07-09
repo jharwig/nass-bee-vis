@@ -8,7 +8,8 @@
     "build": "rm -rf dist && webpack --env production",
     "test": "tsc && eslint --ext=tsx .",
     "fix": "eslint --ext=tsx --fix .",
-    "serve": "serve -s"
+    "serve": "serve -s",
+    "combine-csvs": "tsc --lib ESNext --esModuleInterop ./scripts/combineCSVs.tsx && node ./scripts/combineCSVs.js"
   },
   "repository": "https://github.kensho.com/rupayan-neogy/bee-vis.git",
   "bugs": "https://github.kensho.com/rupayan-neogy/bee-vis/issues",
@@ -25,9 +26,11 @@
     "@babel/core": "^7.9.6",
     "@kensho/tsconfig": "^1.0.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.3.1",
+    "@types/d3-dsv": "^1.0.36",
     "@types/webpack-env": "^1.15.2",
     "babel-loader": "^8.1.0",
     "babel-preset-kensho": "^12.1.1",
+    "d3-dsv": "^1.2.0",
     "eslint": "^6.8.0",
     "eslint-config-kensho": "^16.3.0",
     "html-webpack-plugin": "^4.3.0",
