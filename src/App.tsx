@@ -65,7 +65,7 @@ export default function App(): JSX.Element {
       data.filter(
         (row) => row[1] === year || row[1] === `${year}-Q1` // TODO: combine all quarters for the map
       ),
-    [data]
+    [data, year]
   )
 
   return (
@@ -77,7 +77,7 @@ export default function App(): JSX.Element {
       </header>
       <article css={charts}>
         <figure>
-          {data && <LineChart filter={filter} data={dataForState} />}
+          {data && <LineChart setYear={setYear} filter={filter} data={dataForState} />}
           <figcaption>
             {filter && `${filter.file} ${filter.index} by Year for ${filter.state}`}
           </figcaption>

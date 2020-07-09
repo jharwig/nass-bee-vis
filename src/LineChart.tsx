@@ -10,7 +10,14 @@ const dateForYearField = (d) => {
   return new Date(year)
 }
 
-function LineChart({data}: {data: [string, string, number][]}): JSX.Element {
+function LineChart({
+  setYear,
+  data,
+}: {
+  setYear: React.SetStateAction<string>
+  data: [string, string, number][]
+}): JSX.Element {
+  // TODO: setYear
   return (
     <VictoryChart height={200}>
       <VictoryLine data={data} x={dateForYearField} y={2} />
