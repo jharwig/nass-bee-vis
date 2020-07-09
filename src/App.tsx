@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {css} from '@emotion/core'
 
-import data from '../clean-data/honey2019.csv'
+import jsonData from '../merged-data/honey.json'
 
 import LineChart from './LineChart'
 import MapChart from './MapChart'
@@ -39,11 +39,11 @@ export default function App(): JSX.Element {
           <figcaption>Honey Bee Colonies by Year</figcaption>
         </figure>
         <figure>
-          <MapChart />
-          <figcaption>Bee Data by State</figcaption>
+          {/* <MapChart /> */}
+          {/* <figcaption>Bee Data by State</figcaption> */}
         </figure>
         <figure>
-          <MapChart2 data={data} />
+          <MapChart2 columns={jsonData.columns} data={jsonData.rows} />
         </figure>
       </article>
       <aside css={filters}>
