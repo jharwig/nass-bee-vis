@@ -12,7 +12,7 @@ const dateForYearField = (d) => {
 
 function LineChart({data}: {data: [string, string, number][]}): JSX.Element {
   return (
-    <VictoryChart>
+    <VictoryChart height={200}>
       <VictoryLine data={data} x={dateForYearField} y={2} />
     </VictoryChart>
   )
