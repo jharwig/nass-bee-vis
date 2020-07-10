@@ -43,6 +43,20 @@ function Filters({states, filter, setFilter}: FiltersProps): JSX.Element {
       items: [
         {name: 'Yield', file: 'honey', index: 2},
         {name: 'Production', file: 'honey', index: 3},
+        {name: 'Stocks', file: 'honey', index: 4},
+        {name: 'Price / Pound', file: 'honey', index: 5},
+        {name: 'Value of Production', file: 'honey', index: 6},
+      ],
+    },
+    {
+      group: 'Stressors',
+      items: [
+        {name: 'Varria Mites', file: 'stressors', index: 1},
+        {name: 'Other Pests', file: 'stressors', index: 2},
+        {name: 'Diseases', file: 'stressors', index: 3},
+        {name: 'Pesticides', file: 'stressors', index: 4},
+        {name: 'Other', file: 'stressors', index: 5},
+        {name: 'Unknown', file: 'stressors', index: 6},
       ],
     },
   ]

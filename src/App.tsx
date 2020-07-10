@@ -7,7 +7,6 @@ import stressors from '../merged-data/stressors.json'
 
 import LineChart from './LineChart'
 import MapChart from './MapChart'
-import MapChart2 from './MapChart2'
 import Filters, {Filter} from './Filters'
 
 const files = {
@@ -82,7 +81,10 @@ export default function App(): JSX.Element {
             {filter && `${filter.file} ${filter.index} by Year for ${filter.state}`}
           </figcaption>
         </figure>
-        <figure>{data && <MapChart2 data={dataForYear} />}</figure>
+        <figure>
+          {data && <MapChart filter={filter} data={dataForYear} />}
+          <figcaption>{filter && `${filter.file} ${filter.index} by State for ${year}`}</figcaption>
+        </figure>
       </article>
       <aside css={filters}>
         <Filters states={states} filter={filter} setFilter={setFilter} />

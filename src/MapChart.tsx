@@ -1,74 +1,59 @@
-import React from 'react'
-import {geoCentroid} from 'd3-geo'
-import {ComposableMap, Geographies, Geography, Marker, Annotation} from 'react-simple-maps'
+import React, {useState, useEffect} from 'react'
+import {ComposableMap, Geographies, Geography} from 'react-simple-maps'
+import {scaleLinear} from 'd3-scale'
+import {extent} from 'd3-array'
 
-import allStates from './data/allstates.json'
+import statesJsonMap from './states.json'
 
 const geoUrl = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
 
-const offsets = {
-  VT: [50, -8],
-  NH: [34, 2],
-  MA: [30, -1],
-  RI: [28, 2],
-  CT: [35, 10],
-  NJ: [34, 1],
-  DE: [33, 0],
-  MD: [47, 10],
-  DC: [49, 21],
-}
+const baseColor = 'lightgray'
+const scale = scaleLinear().range([baseColor, 'steelblue'])
 
-// Original example is here: https://www.react-simple-maps.io/examples/usa-with-state-labels/
-function MapChart(): JSX.Element {
-  const states = ({geographies}) =>
-    geographies.map((geo) => {
-      // cur.id is the abbreviated name of the state
-      const cur = allStates.find((s) => s.val === geo.id)
-      const fill = '#DDD'
-      // Can also add tooltip info to state
-      return <Geography key={geo.rsmKey} stroke="#FFF" geography={geo} fill="#DDD" />
-    })
+// Original example is here: https://www.react-simple-maps.io/examples/usa-counties-choropleth-quantize/
+function MapChart2({filter, data}): JSX.Element {
+  const [filteredData, setFilteredData] = useState([])
+
+  useEffect(() => {
+    setFilteredData(data.filter((d) => !['other', 'US'].includes(d[0])))
+  }, [data])
+
+  const [version, setVersion] = useState(1)
+  useEffect(() => {
+    if (!filteredData.length) return
+    scale.domain(extent(filteredData, (d) => d[2]))
+    console.log(scale.domain())
+  }, [filteredData])
+
+  useEffect(() => {
+    setVersion((v) => v + 1)
+  }, [filter])
+
+  const states = React.useCallback(
+    ({geographies}) =>
+      geographies.map((geo) => {
+        const cur = filteredData.find((d) => statesJsonMap[d[0]] === geo.properties.name)
+        return (
+          <Geography
+            key={geo.rsmKey}
+            stroke="#FFF"
+            geography={geo}
+            fill={cur ? scale(cur[2]) : baseColor}
+          />
+        )
+      }),
+    [filteredData]
+  )
+
+  if (!filteredData.length) return null
 
   return (
-    <ComposableMap projection="geoAlbersUsa">
-      <Geographies geography={geoUrl}>
-        {states}
-        {/* Labels states
-        {({geographies}) => (
-          <>
-            {geographies.map((geo) => (
-              <Geography key={geo.rsmKey} stroke="#FFF" geography={geo} fill="#DDD" />
-            ))}
-          //{geographies.map((geo) => {
-            //const centroid = geoCentroid(geo)
-            //const cur = allStates.find((s) => s.val === geo.id)
-            //return (
-              //<g key={`${geo.rsmKey}-name`}>
-                //{cur &&
-                  //centroid[0] > -160 &&
-                  //centroid[0] < -67 &&
-                  //(Object.keys(offsets).indexOf(cur.id) === -1 ? (
-                    //<Marker coordinates={centroid}>
-                      //<text y="2" fontSize={14} textAnchor="middle">
-                        //{cur.id}
-                      //</text>
-                    //</Marker>
-                  //) : (
-                    //<Annotation subject={centroid} dx={offsets[cur.id][0]} dy={offsets[cur.id][1]}>
-                      //<text x={4} fontSize={14} alignmentBaseline="middle">
-                        //{cur.id}
-                      //</text>
-                    //</Annotation>
-                  //))}
-              //</g>
-            //)
-          })}
-          </>
-        )}
-		*/}
-      </Geographies>
-    </ComposableMap>
+    <>
+      <ComposableMap key={version} projection="geoAlbersUsa">
+        <Geographies geography={geoUrl}>{states}</Geographies>
+      </ComposableMap>
+    </>
   )
 }
 
-export default MapChart
+export default MapChart2
