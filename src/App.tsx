@@ -35,38 +35,64 @@ const container = css(`
   grid-template-areas:
     "header header"
     "charts filters"
+    "footer footer"
 `)
 
 const header = css(`grid-area: header; font-weight: bold;`)
 const charts = css(`grid-area: charts`)
 const filters = css(`grid-area: filters`)
+const footer = css(`grid-area: footer; font-size: 80%; opacity: 0.6;`)
+
+const defaultYear = '2019'
 
 export default function App(): JSX.Element {
   const [filter, setFilter] = React.useState<Filter>({state: 'US', file: 'honey', index: 1})
 
-  const [year, setYear] = React.useState('2015')
+  const [year, setYear] = React.useState(defaultYear)
+  const yearRef = React.useRef(year)
+  React.useEffect(() => {
+    yearRef.current = year
+  }, [year])
+
+  const onChangeState = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+    setFilter((filter) => ({...filter, state: event.target.value}))
+  }
+
   const [data, setData] = React.useState()
   React.useEffect(() => {
     const file = files[filter.file]
+    // let found = false
     setData(
-      file.rows.map((row) => [
-        row[file.columns.indexOf('State')],
-        row[file.columns.indexOf('Year')],
-        +row[filter.index],
-      ])
+      file.rows.map((row) => {
+        const rowYear = row[file.columns.indexOf('Year')]
+        return [row[file.columns.indexOf('State')], rowYear, +row[filter.index]]
+      })
     )
   }, [filter])
+  React.useEffect(() => {
+    if (!data) return
+    let found = false
+    const latestYear = 0
+    const years = []
+    for (const row in data) {
+      const year = data[row][1]
+      if (year === yearRef.current) {
+        found = true
+        break
+      }
+      years.push(year)
+    }
+    if (!found) {
+      setYear(years.sort()[years.length - 1])
+    }
+  }, [data])
   const dataForState = React.useMemo(() => data && data.filter((row) => row[0] === filter.state), [
     data,
   ])
-  const dataForYear = React.useMemo(
-    () =>
-      data &&
-      data.filter(
-        (row) => row[1] === year || row[1] === `${year}-Q1` // TODO: combine all quarters for the map
-      ),
-    [data, year]
-  )
+  const dataForYear = React.useMemo(() => data && data.filter((row) => row[1] === year), [
+    data,
+    year,
+  ])
 
   const [tooltipContent, setTooltipContent] = React.useState('')
 
@@ -79,24 +105,55 @@ export default function App(): JSX.Element {
       </header>
       <article css={charts}>
         <figure>
-          {data && <LineChart setYear={setYear} filter={filter} data={dataForState} />}
           <figcaption>
-            {filter && `${filter.file} ${filter.index} by Year for ${filter.state}`}
+            {filter && (
+              <>
+                {filter.desc} by Year for{' '}
+                <select value={filter.state} onChange={onChangeState}>
+                  <option value="US">US</option>
+                  {states.map(
+                    (state) =>
+                      state !== 'US' && (
+                        <option key={state} value={state}>
+                          {state}
+                        </option>
+                      )
+                  )}
+                </select>
+              </>
+            )}
           </figcaption>
+          {data && <LineChart setYear={setYear} filter={filter} data={dataForState} />}
         </figure>
         <figure>
+          <figcaption>
+            {filter && (
+              <>
+                {filter.desc} by State for {year}
+              </>
+            )}
+          </figcaption>
           {data && (
             <>
               <MapChart setTooltipContent={setTooltipContent} filter={filter} data={dataForYear} />
               <ReactTooltip>{tooltipContent}</ReactTooltip>
             </>
           )}
-          <figcaption>{filter && `${filter.file} ${filter.index} by State for ${year}`}</figcaption>
         </figure>
       </article>
       <aside css={filters}>
-        <Filters states={states} filter={filter} setFilter={setFilter} />
+        <Filters filter={filter} setFilter={setFilter} />
       </aside>
+      <footer css={footer}>
+        Data provided by{' '}
+        <a href="https://usda.library.cornell.edu/concern/publications/rn301137d?locale=en">
+          NASS Honey Bee Colonies
+        </a>{' '}
+        and{' '}
+        <a href="https://usda.library.cornell.edu/concern/publications/hd76s004z?locale=en">
+          NASS Honey
+        </a>
+      </footer>
     </main>
   )
 }

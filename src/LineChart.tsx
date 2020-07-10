@@ -28,10 +28,10 @@ function LineChart({
   setYear: React.SetStateAction<string>
   data: [string, string, number][]
 }): JSX.Element {
-  console.log(data)
-  // TODO: setYear
+  const quarter = data && data[0] && data[0][1].replace(/^\d+(-Q)?/, '')
   return (
     <VictoryChart
+      key={quarter}
       height={175}
       containerComponent={
         <VictoryBrushContainer
@@ -39,15 +39,21 @@ function LineChart({
           brushDimension="x"
           allowResize={false}
           brushDomain={{
-            x: [new Date(2018, 1, 1), new Date(2019, 0, 1)],
+            x: quarter
+              ? [new Date(2019, 0, 1), new Date(2019, 3, 1)]
+              : [new Date(2018, 1, 1), new Date(2019, 0, 1)],
           }}
           onBrushDomainChange={(domain) => {
-            setYear(`${domain.x[1].getFullYear()}`)
+            if (quarter) {
+              setYear(`${domain.x[1].getFullYear()}-Q${Math.trunc(domain.x[1].getMonth() / 4) + 1}`)
+            } else {
+              setYear(`${domain.x[1].getFullYear()}`)
+            }
           }}
         />
       }
     >
-      <VictoryLine data={data} x={dateForYearField} y={2} interpolation="natural" />
+      <VictoryLine data={data} x={dateForYearField} y={2} />
     </VictoryChart>
   )
 }

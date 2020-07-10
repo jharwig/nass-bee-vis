@@ -28,6 +28,7 @@
     "d3-fetch": "^1.2.0",
     "d3-geo": "^1.12.1",
     "d3-scale": "^3.2.1",
+    "d3-scale-chromatic": "^1.5.0",
     "emotion": "^10.0.27",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
