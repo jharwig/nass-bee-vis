@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import {ComposableMap, Geographies, Geography} from 'react-simple-maps'
 import {scaleLinear} from 'd3-scale'
 import {extent} from 'd3-array'
+import ReactTooltip from 'react-tooltip'
 
 import statesJsonMap from './states.json'
 
@@ -11,7 +12,7 @@ const baseColor = 'lightgray'
 const scale = scaleLinear().range([baseColor, 'steelblue'])
 
 // Original example is here: https://www.react-simple-maps.io/examples/usa-counties-choropleth-quantize/
-function MapChart2({filter, data}): JSX.Element {
+function MapChart({setTooltipContent, filter, data}): JSX.Element {
   const [filteredData, setFilteredData] = useState([])
 
   useEffect(() => {
@@ -22,7 +23,6 @@ function MapChart2({filter, data}): JSX.Element {
   useEffect(() => {
     if (!filteredData.length) return
     scale.domain(extent(filteredData, (d) => d[2]))
-    console.log(scale.domain())
   }, [filteredData])
 
   useEffect(() => {
@@ -35,6 +35,12 @@ function MapChart2({filter, data}): JSX.Element {
         const cur = filteredData.find((d) => statesJsonMap[d[0]] === geo.properties.name)
         return (
           <Geography
+            onMouseEnter={() => {
+              setTooltipContent(geo.properties.name)
+            }}
+            onMouseLeave={() => {
+              setTooltipContent('')
+            }}
             key={geo.rsmKey}
             stroke="#FFF"
             geography={geo}
@@ -42,18 +48,27 @@ function MapChart2({filter, data}): JSX.Element {
           />
         )
       }),
-    [filteredData]
+    [filteredData, setTooltipContent]
   )
+
+  // Because of returning null below, react-tooltip may lose track
+  // of elements that we want a tooltip over (data-tip="").
+  // Rebuilding the tooltip tells it to finds these elements again.
+  useEffect(() => {
+    ReactTooltip.rebuild()
+  })
 
   if (!filteredData.length) return null
 
   return (
     <>
-      <ComposableMap key={version} projection="geoAlbersUsa">
+      <ComposableMap data-tip="" key={version} projection="geoAlbersUsa">
         <Geographies geography={geoUrl}>{states}</Geographies>
       </ComposableMap>
     </>
   )
 }
 
-export default MapChart2
+// react-tooltip docs recommend using React.memo to "prevent excessive
+// rendering when the content of the tooltip is set"
+export default React.memo(MapChart)

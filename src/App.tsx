@@ -1,5 +1,6 @@
 import * as React from 'react'
 import {css} from '@emotion/core'
+import ReactTooltip from 'react-tooltip'
 
 import honey from '../merged-data/honey.json'
 import numbers from '../merged-data/numbers.json'
@@ -67,6 +68,8 @@ export default function App(): JSX.Element {
     [data, year]
   )
 
+  const [tooltipContent, setTooltipContent] = React.useState('')
+
   return (
     <main css={container}>
       <header css={header}>
@@ -82,7 +85,12 @@ export default function App(): JSX.Element {
           </figcaption>
         </figure>
         <figure>
-          {data && <MapChart filter={filter} data={dataForYear} />}
+          {data && (
+            <>
+              <MapChart setTooltipContent={setTooltipContent} filter={filter} data={dataForYear} />
+              <ReactTooltip>{tooltipContent}</ReactTooltip>
+            </>
+          )}
           <figcaption>{filter && `${filter.file} ${filter.index} by State for ${year}`}</figcaption>
         </figure>
       </article>
