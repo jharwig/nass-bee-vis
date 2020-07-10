@@ -64,15 +64,9 @@ export default function App(): JSX.Element {
     setData(
       file.rows.map((row) => {
         const rowYear = row[file.columns.indexOf('Year')]
-        // if (year === yearRef.current) {
-        // found = true
-        // }
         return [row[file.columns.indexOf('State')], rowYear, +row[filter.index]]
       })
     )
-    // if (!found) {
-    // setYear(defaultYear)
-    // }
   }, [filter])
   React.useEffect(() => {
     if (!data) return
