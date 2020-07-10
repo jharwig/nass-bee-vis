@@ -1,8 +1,18 @@
 {
-  "extends": "@kensho/tsconfig",
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
     "isolatedModules": false,
+    "jsx": "react",
+    "module": "esnext",
+    "moduleResolution": "node",
     "noEmit": true
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+    "target": "ES2020"
   }
 }
+
