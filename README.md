@@ -1,5 +1,7 @@
 # Honeybee Data Visualization 🐝
 
+[Demo](https://jharwig.github.io/nass-bee-vis/)
+
 ## Contributors
 [@jharwig](https://github.com/jharwig), [@rneogy](https://github.com/neogy), [@nabeel-](https://github.com/nabeel-), and [@filiposowski](https://github.com/FilipOsowski)
 
