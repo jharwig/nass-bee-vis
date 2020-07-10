@@ -1,5 +1,5 @@
 {
-  "name": "@kensho/bee-vis",
+  "name": "nass-bee-vis",
   "version": "0.0.0",
   "description": "🐝",
   "main": "index.js",
@@ -11,10 +11,8 @@
     "serve": "serve -s",
     "combine-csvs": "tsc --lib ESNext --esModuleInterop ./scripts/combineCSVs.tsx && node ./scripts/combineCSVs.js"
   },
-  "repository": "https://github.kensho.com/rupayan-neogy/bee-vis.git",
-  "bugs": "https://github.kensho.com/rupayan-neogy/bee-vis/issues",
   "author": "Kensho Technologies, LLC.",
-  "license": "UNLICENSED",
+  "license": "Public Domain",
   "dependencies": {
     "@emotion/core": "^10.0.28",
     "@types/d3-array": "^2.0.0",
@@ -38,7 +36,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
-    "@kensho/tsconfig": "^1.0.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.3.1",
     "@types/d3-dsv": "^1.0.36",
     "@types/webpack-env": "^1.15.2",
