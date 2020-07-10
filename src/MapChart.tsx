@@ -1,17 +1,29 @@
 import React, {useState, useEffect} from 'react'
 import {ComposableMap, Geographies, Geography} from 'react-simple-maps'
-import {scaleLinear} from 'd3-scale'
+import {scaleLinear, scaleOrdinal} from 'd3-scale'
+import {css} from '@emotion/core'
+import * as chromatic from 'd3-scale-chromatic'
 import {extent} from 'd3-array'
+import * as scales from 'd3-scale-chromatic'
 
 import statesJsonMap from './states.json'
 
 const geoUrl = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
 
 const baseColor = 'lightgray'
-const scale = scaleLinear().range([baseColor, 'steelblue'])
+const scale = scaleOrdinal(chromatic.schemeOranges[9])
+const legend = css(`
+float: right;
+list-style: none;
+li {
+display: inline-block;
+width: 30px;
+height: 10px;
+}
+`)
 
 // Original example is here: https://www.react-simple-maps.io/examples/usa-counties-choropleth-quantize/
-function MapChart2({filter, data}): JSX.Element {
+function MapChart({filter, data}): JSX.Element {
   const [filteredData, setFilteredData] = useState([])
 
   useEffect(() => {
@@ -52,8 +64,13 @@ function MapChart2({filter, data}): JSX.Element {
       <ComposableMap key={version} projection="geoAlbersUsa">
         <Geographies geography={geoUrl}>{states}</Geographies>
       </ComposableMap>
+      <ul css={legend}>
+        {chromatic.schemeOranges[9].map((color) => (
+          <li key={color} style={{backgroundColor: color}} />
+        ))}
+      </ul>
     </>
   )
 }
 
-export default MapChart2
+export default MapChart
