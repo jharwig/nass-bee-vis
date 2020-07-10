@@ -7,7 +7,6 @@ module.exports = (env) => {
   return {
     output: {
       filename: dev ? '[name].js' : '[name].[chunkhash].js',
-      publicPath: '/',
     },
     plugins: [new HTMLPlugin({title: '🐝'}), new ReactRefreshPlugin()],
     devtool: dev ? 'cheap-module-source-map' : 'source-map',
