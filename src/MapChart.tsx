@@ -11,8 +11,9 @@ import statesJsonMap from './states.json'
 
 const geoUrl = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
 
-const baseColor = 'lightgray'
-const scale = scaleOrdinal(chromatic.schemeOranges[9])
+const noDataColor = 'lightgray'
+const baseColor = chromatic.schemeOranges[9][0]
+const scale = scaleLinear([baseColor, chromatic.schemeOranges[9][8]])
 const legend = css(`
 float: right;
 list-style: none;
@@ -80,7 +81,7 @@ function MapChart({setTooltipContent, filter, data}): JSX.Element {
             key={geo.rsmKey}
             stroke="#FFF"
             geography={geo}
-            fill={cur ? scale(cur[2]) : baseColor}
+            fill={cur && !isNaN(cur[2]) ? scale(cur[2]) : noDataColor}
           />
         )
       }),
@@ -101,11 +102,11 @@ function MapChart({setTooltipContent, filter, data}): JSX.Element {
       <ComposableMap data-tip="" key={version} projection="geoAlbersUsa">
         <Geographies geography={geoUrl}>{states}</Geographies>
       </ComposableMap>
-      <ul css={legend}>
+      {/*<ul css={legend}>
         {chromatic.schemeOranges[9].map((color) => (
           <li key={color} style={{backgroundColor: color}} />
         ))}
-      </ul>
+      </ul>*/}
     </>
   )
 }

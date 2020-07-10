@@ -46,7 +46,7 @@ const footer = css(`grid-area: footer; font-size: 80%; opacity: 0.6;`)
 const defaultYear = '2019'
 
 export default function App(): JSX.Element {
-  const [filter, setFilter] = React.useState<Filter>({state: 'US', file: 'honey', index: 1})
+  const [filter, setFilter] = React.useState<Filter>({state: 'US', file: 'honey', index: 1, desc: 'Honey Producing'})
 
   const [year, setYear] = React.useState(defaultYear)
   const yearRef = React.useRef(year)
