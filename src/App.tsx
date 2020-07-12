@@ -61,11 +61,12 @@ export default function App(): JSX.Element {
   const [data, setData] = React.useState()
   React.useEffect(() => {
     const file = files[filter.file]
-    // let found = false
+    const isPercentage = filter.file === 'stressors'
     setData(
       file.rows.map((row) => {
         const rowYear = row[file.columns.indexOf('Year')]
-        return [row[file.columns.indexOf('State')], rowYear, +row[filter.index]]
+        const value = +row[filter.index];
+        return [row[file.columns.indexOf('State')], rowYear, isPercentage? value / 100: value, isPercentage ? 'percent' : '']
       })
     )
   }, [filter])
