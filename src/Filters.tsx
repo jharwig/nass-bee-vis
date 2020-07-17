@@ -58,7 +58,7 @@ function Filters({filter, setFilter}: FiltersProps): JSX.Element {
     {
       group: 'Stressors',
       items: [
-        {name: 'Varria Mites', file: 'stressors', index: 1},
+        {name: 'Varroa mites', file: 'stressors', index: 1},
         {name: 'Other Pests', file: 'stressors', index: 2},
         {name: 'Diseases', file: 'stressors', index: 3},
         {name: 'Pesticides', file: 'stressors', index: 4},

@@ -153,7 +153,8 @@ export default function App(): JSX.Element {
         and{' '}
         <a href="https://usda.library.cornell.edu/concern/publications/hd76s004z?locale=en">
           NASS Honey
-        </a> | <a href="https://github.com/jharwig/nass-bee-vis">Github</a>
+        </a> | <a href="https://github.com/jharwig/nass-bee-vis">Github</a> | <a href="https://www.kaggle.com/jasonharwig/nass-bee-colony-and-honey">Kaggle Dataset</a>
+        <p>A <a href="https://www.kensho.com">Kensho</a> Impactathon Summer 2020 project.</p>
       </footer>
     </main>
   )
