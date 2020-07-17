@@ -6,6 +6,7 @@
   "scripts": {
     "start": "webpack-dev-server",
     "build": "rm -rf dist && webpack --env production",
+    "deploy": "gh-pages -d dist -o public",
     "test": "tsc && eslint --ext=tsx .",
     "fix": "eslint --ext=tsx --fix .",
     "serve": "serve -s",
@@ -45,6 +46,7 @@
     "d3-dsv": "^1.2.0",
     "eslint": "^6.8.0",
     "eslint-config-kensho": "^16.3.0",
+    "gh-pages": "^3.1.0",
     "html-webpack-plugin": "^4.3.0",
     "prettier": "^2.0.5",
     "serve": "^11.3.0",
