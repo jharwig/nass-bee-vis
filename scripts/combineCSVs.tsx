@@ -1,6 +1,8 @@
 import {readdir, readFileSync, writeFile} from 'fs'
 import path from 'path'
 
+import stringify from 'csv-stringify/lib/sync'
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {csvParseRows} from 'd3-dsv'
 
@@ -266,6 +268,25 @@ async function runner(): Promise<void> {
   writeFile(
     path.resolve(__dirname, '../merged-data/honey.json'),
     JSON.stringify(honey, null, 2),
+    {flag: 'w'},
+    noop
+  )
+
+  writeFile(
+    path.resolve(__dirname, '../merged-data/stressors.csv'),
+    stringify([stressors.columns, ...stressors.rows]),
+    {flag: 'w'},
+    noop
+  )
+  writeFile(
+    path.resolve(__dirname, '../merged-data/numbers.csv'),
+    stringify([numbers.columns, ...numbers.rows]),
+    {flag: 'w'},
+    noop
+  )
+  writeFile(
+    path.resolve(__dirname, '../merged-data/honey.csv'),
+    stringify([honey.columns, ...honey.rows]),
     {flag: 'w'},
     noop
   )

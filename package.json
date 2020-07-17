@@ -10,7 +10,7 @@
     "test": "tsc && eslint --ext=tsx .",
     "fix": "eslint --ext=tsx --fix .",
     "serve": "serve -s",
-    "combine-csvs": "tsc --lib ESNext --esModuleInterop ./scripts/combineCSVs.tsx && node ./scripts/combineCSVs.js"
+    "combine-csvs": "tsc --lib ESNext,dom --esModuleInterop ./scripts/combineCSVs.tsx && node ./scripts/combineCSVs.js"
   },
   "author": "Kensho Technologies, LLC.",
   "license": "Public Domain",
@@ -43,6 +43,7 @@
     "babel-loader": "^8.1.0",
     "babel-preset-kensho": "^12.1.1",
     "csv-loader": "^3.0.3",
+    "csv-stringify": "^5.5.0",
     "d3-dsv": "^1.2.0",
     "eslint": "^6.8.0",
     "eslint-config-kensho": "^16.3.0",
