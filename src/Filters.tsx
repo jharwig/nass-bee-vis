@@ -3,7 +3,7 @@ import {css} from '@emotion/core'
 
 export interface Filter {
   state: string
-  tables: {file: string; index: number; desc: string}[]
+  tables: {file: string; index: number; desc: string; units: string}[]
 }
 
 interface FiltersProps {
@@ -33,13 +33,19 @@ function Filters({filter, setFilter}: FiltersProps): JSX.Element {
   const [filterTypes, setFilterTypes] = React.useState([])
   const onChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const {checked} = event.target
-    const {file, index, desc} = event.target.dataset
+    const {file, index, desc, units} = event.target.dataset
     if (file && index) {
       setFilter((prevFilter) => {
         const newTables = prevFilter.tables
         if (checked) {
-          newTables.push({file, index, desc})
+          newTables.push({file, index, desc, units})
+          if (!filterTypes.includes(units)) {
+            filterTypes.push(units)
+          }
         } else {
+          if (newTables.filter((table) => table.units === units).length === 1) {
+            filterTypes.splice(filterTypes.indexOf(units), 1)
+          }
           for (let i = 0; i < newTables.length; i++) {
             if (newTables[i].desc === desc) {
               newTables.splice(i, 1)
@@ -89,7 +95,7 @@ function Filters({filter, setFilter}: FiltersProps): JSX.Element {
       {filterDefs.map(({group, items}) => (
         <section css={section} key={group}>
           <strong>{group}</strong>
-          {items.map(({file, index, name}) => (
+          {items.map(({file, index, name, units}) => (
             <label key={file + index} css={label}>
               <input
                 type="checkbox"
@@ -101,7 +107,8 @@ function Filters({filter, setFilter}: FiltersProps): JSX.Element {
                 data-desc={name}
                 data-file={file}
                 data-index={index}
-                disabled={false}
+                data-units={units}
+                disabled={filterTypes.length === 2 && !filterTypes.includes(units)}
               />{' '}
               {name}
             </label>
