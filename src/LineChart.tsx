@@ -152,6 +152,7 @@ function LineChart({
         >
           {data.map((rows, i, list) => (
             <VictoryLine
+              key={i}
               data={rows}
               style={lineStyleForIndex(i, dataColors)}
               x={dateForYearField}
@@ -186,6 +187,7 @@ function LineChart({
           {normalizedAltData &&
             normalizedAltData.data.map((rows, i) => (
               <VictoryLine
+                key={i}
                 data={rows}
                 style={lineStyleForIndex(i, altColors)}
                 x={dateForYearField}

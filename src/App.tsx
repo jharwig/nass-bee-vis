@@ -240,7 +240,9 @@ export default function App(): JSX.Element {
                     onChange={(event) => setTableForMap(+event.target.value)}
                   >
                     {selectedTables.map(({desc}, i) => (
-                      <option value={`${i}`}>{desc}</option>
+                      <option key={desc} value={`${i}`}>
+                        {desc}
+                      </option>
                     ))}
                   </select>{' '}
                   by State for {year}
