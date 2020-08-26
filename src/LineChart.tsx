@@ -56,6 +56,24 @@ function getDomain(tables: Table[]): Domain {
   )
 }
 
+function useElementSize<T>() {
+  const ref = React.useRef<T>(null)
+  const [size, setSize] = React.useState({width: null, height: null})
+  React.useEffect(() => {
+    const element = ref.current
+    const update = () => setSize({width: element.offsetWidth, height: element.offsetHeight})
+    if (element) {
+      update()
+    }
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('resize', update)
+    }
+  }, [ref])
+
+  return {ref, size}
+}
+
 function LineChart({
   dataColors = 'black',
   altColors = 'red',
@@ -69,6 +87,7 @@ function LineChart({
   data: Table[]
   altData?: Table[]
 }): JSX.Element {
+  const {ref, size} = useElementSize<HTMLDivElement>()
   const mainDomain: Domain = getDomain(data)
   const altDomain: Domain | undefined = altData && getDomain(altData)
 
@@ -100,78 +119,82 @@ function LineChart({
   const isPercentage = data && data[0] && data[0][0][3] === 'percent'
   const padding = {top: 10, right: 50, bottom: 30, left: 50}
   return (
-    <VictoryChart
-      key={`${mainDomain.usesQuarters}${mainDomain.lastYear}`}
-      padding={padding}
-      width={600}
-      height={150}
-      containerComponent={
-        <VictoryBrushContainer
-          defaultBrushArea="move"
-          brushDimension="x"
-          allowResize={false}
-          brushStyle={{stroke: 'transparent', fill: 'black', fillOpacity: 0.1}}
-          brushDomain={{
-            x: mainDomain.usesQuarters
-              ? [new Date(mainDomain.lastYear - 1, 10, 1), new Date(mainDomain.lastYear, 0, 1)]
-              : [new Date(mainDomain.lastYear - 1, 1, 1), new Date(mainDomain.lastYear, 0, 1)],
-          }}
-          onBrushDomainChange={(domain) => {
-            if (mainDomain.usesQuarters) {
-              const middle = new Date(
-                (domain.x[1].getTime() - domain.x[0].getTime()) / 2 + domain.x[0].getTime()
-              )
-              setYear(`${middle.getFullYear()}-Q${Math.trunc(middle.getMonth() / 3) + 1}`)
-            } else {
-              setYear(`${domain.x[1].getFullYear()}`)
-            }
-          }}
-        />
-      }
-    >
-      {data.map((rows, i, list) => (
-        <VictoryLine
-          data={rows}
-          style={lineStyleForIndex(i, dataColors)}
-          x={dateForYearField}
-          y={2}
-        />
-      ))}
-      <VictoryAxis tickFormat={(f) => f.getFullYear()} scale={{x: 'time', y: 'linear'}} />
-      <VictoryAxis
-        scale={{x: 'time', y: 'linear'}}
-        dependentAxis
-        style={{axis: {stroke: dataColors}, tickLabels: {fill: dataColors}}}
-        tickFormat={(f) => {
-          if (isPercentage) return `${Math.round(f * 100)}%`
-          if (f > 5000) {
-            return `${Math.round(f / 1000)}k`
+    <div ref={ref} style={{height: '100%'}}>
+      {size && size.width && size.height && (
+        <VictoryChart
+          key={`${mainDomain.usesQuarters}${mainDomain.lastYear}`}
+          padding={padding}
+          width={size.width}
+          height={size.height}
+          containerComponent={
+            <VictoryBrushContainer
+              defaultBrushArea="move"
+              brushDimension="x"
+              allowResize={false}
+              brushStyle={{stroke: 'transparent', fill: 'black', fillOpacity: 0.1}}
+              brushDomain={{
+                x: mainDomain.usesQuarters
+                  ? [new Date(mainDomain.lastYear - 1, 10, 1), new Date(mainDomain.lastYear, 0, 1)]
+                  : [new Date(mainDomain.lastYear - 1, 1, 1), new Date(mainDomain.lastYear, 0, 1)],
+              }}
+              onBrushDomainChange={(domain) => {
+                if (mainDomain.usesQuarters) {
+                  const middle = new Date(
+                    (domain.x[1].getTime() - domain.x[0].getTime()) / 2 + domain.x[0].getTime()
+                  )
+                  setYear(`${middle.getFullYear()}-Q${Math.trunc(middle.getMonth() / 3) + 1}`)
+                } else {
+                  setYear(`${domain.x[1].getFullYear()}`)
+                }
+              }}
+            />
           }
-          return f
-        }}
-      />
-      {/* Right Axis */}
-      {normalizedAltData && (
-        <VictoryAxis
-          offsetX={padding.right}
-          standalone={false}
-          style={{axis: {stroke: altColors}, tickLabels: {fill: altColors}}}
-          scale={{x: 'time', y: 'linear'}}
-          dependentAxis
-          tickFormat={normalizedAltData.tickFormat}
-          orientation="right"
-        />
-      )}
-      {normalizedAltData &&
-        normalizedAltData.data.map((rows, i) => (
-          <VictoryLine
-            data={rows}
-            style={lineStyleForIndex(i, altColors)}
-            x={dateForYearField}
-            y={2}
+        >
+          {data.map((rows, i, list) => (
+            <VictoryLine
+              data={rows}
+              style={lineStyleForIndex(i, dataColors)}
+              x={dateForYearField}
+              y={2}
+            />
+          ))}
+          <VictoryAxis tickFormat={(f) => f.getFullYear()} scale={{x: 'time', y: 'linear'}} />
+          <VictoryAxis
+            scale={{x: 'time', y: 'linear'}}
+            dependentAxis
+            style={{axis: {stroke: dataColors}, tickLabels: {fill: dataColors}}}
+            tickFormat={(f) => {
+              if (isPercentage) return `${Math.round(f * 100)}%`
+              if (f > 5000) {
+                return `${Math.round(f / 1000)}k`
+              }
+              return f
+            }}
           />
-        ))}
-    </VictoryChart>
+          {/* Right Axis */}
+          {normalizedAltData && (
+            <VictoryAxis
+              offsetX={padding.right}
+              standalone={false}
+              style={{axis: {stroke: altColors}, tickLabels: {fill: altColors}}}
+              scale={{x: 'time', y: 'linear'}}
+              dependentAxis
+              tickFormat={normalizedAltData.tickFormat}
+              orientation="right"
+            />
+          )}
+          {normalizedAltData &&
+            normalizedAltData.data.map((rows, i) => (
+              <VictoryLine
+                data={rows}
+                style={lineStyleForIndex(i, altColors)}
+                x={dateForYearField}
+                y={2}
+              />
+            ))}
+        </VictoryChart>
+      )}
+    </div>
   )
 }
 
