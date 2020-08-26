@@ -28,55 +28,85 @@ const states = Object.keys(
   }, {})
 ).sort()
 
-const container = css(`
+const container = css`
   width: 100vw;
   min-height: 100vh;
   font-family: sans-serif;
   display: grid;
-  grid-template-columns: 0.33fr 2fr;
+  grid-template-columns: minmax(200px, 0.33fr) 2fr;
   grid-template-rows: auto 1fr;
   gap: 0 20px;
   grid-template-areas:
-    "header header"
-    "filters charts"
-    "footer footer"
-`)
+    'header header'
+    'filters charts'
+    'footer footer';
+`
 
-const globalCss = css({
-  html: {
-    body: {
-      margin: 0,
-    },
-  },
-  figure: {
-    marginBlockStart: 0,
-    marginBlockEnd: 0,
-    marginInlineStart: 0,
-    marginInlineEnd: 0,
-  },
-  a: {
-    color: YELLOW,
-  },
-})
+const globalCss = css`
+  html {
+    body {
+      margin: 0;
+    }
+  }
+  figure {
+    margin-block-start: 0;
+    margin-block-end: 0;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+  }
+  a {
+    color: ${YELLOW};
+  }
+`
 
-const header = css(
-  `grid-area: header; font-weight: bold; background: ${BLACK}; color: ${WHITE}; padding: 1em;`
-)
-const charts = css(`
+const header = css`
+  grid-area: header;
+  font-weight: bold;
+  background: ${BLACK};
+  color: ${WHITE};
+  padding: 1em;
+`
+const charts = css`
   grid-area: charts;
   display: grid;
   width: 100%;
   gap: 0 20px;
+  grid-template-rows: minmax(150px, 30vh) minmax(200px, 55vh);
   grid-template-areas:
-    "lineCharts mapChart"
-`)
-const filters = css(`grid-area: filters; padding: 1em 0 1em 1em; background: #f2f5fa;`)
-const footer = css(
-  `grid-area: footer; font-size: 80%; padding: 1em; text-align: center; background: ${BLACK}; color: ${WHITE};`
-)
+    'lineCharts'
+    'mapChart';
+`
+const filters = css`
+  grid-area: filters;
+  padding: 1em 0 1em 1em;
+  background: #f2f5fa;
+`
+const footer = css`
+  grid-area: footer;
+  font-size: 80%;
+  padding: 1em;
+  text-align: center;
+  background: ${BLACK};
+  color: ${WHITE};
+`
 
-const lineCharts = css(`grid-area: lineCharts; margin-block-start: 0; margin: 1em 0;`)
-const mapChart = css(`grid-area: mapChart; margin: 1em 0;`)
+const lineCharts = css`
+  grid-area: lineCharts;
+  margin-block-start: 0;
+  margin: 1em 0;
+  .VictoryContainer > svg {
+    max-height: 100%;
+  }
+`
+const mapChart = css`
+  grid-area: mapChart;
+  margin: 1em 0;
+  svg {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+  }
+`
 
 const defaultYear = '2019'
 
