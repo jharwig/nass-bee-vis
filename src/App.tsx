@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {css} from '@emotion/core'
+import {css, Global} from '@emotion/core'
 import ReactTooltip from 'react-tooltip'
 
 import honey from '../merged-data/honey.json'
@@ -9,6 +9,10 @@ import stressors from '../merged-data/stressors.json'
 import LineChart from './LineChart'
 import MapChart from './MapChart'
 import Filters, {Filter} from './Filters'
+
+const YELLOW = '#F9C846'
+const BLACK = '#545863'
+const WHITE = '#F7F5FB'
 
 const files = {
   honey,
@@ -26,27 +30,64 @@ const states = Object.keys(
 
 const container = css(`
   width: 100vw;
-  margin: 1em;
+  min-height: 100vh;
   font-family: sans-serif;
   display: grid;
-  grid-template-columns: 2fr 0.5fr;
+  grid-template-columns: 0.33fr 2fr;
   grid-template-rows: auto 1fr;
   gap: 0 20px;
   grid-template-areas:
     "header header"
-    "charts filters"
+    "filters charts"
     "footer footer"
 `)
 
-const header = css(`grid-area: header; font-weight: bold;`)
-const charts = css(`grid-area: charts`)
-const filters = css(`grid-area: filters`)
-const footer = css(`grid-area: footer; font-size: 80%; opacity: 0.6;`)
+const globalCss = css({
+  html: {
+    body: {
+      margin: 0,
+    },
+  },
+  figure: {
+    marginBlockStart: 0,
+    marginBlockEnd: 0,
+    marginInlineStart: 0,
+    marginInlineEnd: 0,
+  },
+  a: {
+    color: YELLOW,
+  },
+})
+
+const header = css(
+  `grid-area: header; font-weight: bold; background: ${BLACK}; color: ${WHITE}; padding: 1em;`
+)
+const charts = css(`
+  grid-area: charts;
+  display: grid;
+  width: 100%;
+  grid-template-areas:
+    "lineCharts mapChart"
+`)
+const filters = css(`grid-area: filters; padding: 1em 0 1em 1em; background: #f2f5fa;`)
+const footer = css(
+  `grid-area: footer; font-size: 80%; padding: 1em; text-align: center; background: ${BLACK}; color: ${WHITE};`
+)
+
+const lineCharts = css(
+  `grid-area: lineCharts; margin-block-start: 0; margin: 1em 0; overflow: auto; height: 100%;`
+)
+const mapChart = css(`grid-area: mapChart; margin: 1em 0;`)
 
 const defaultYear = '2019'
 
 export default function App(): JSX.Element {
-  const [filter, setFilter] = React.useState<Filter>({state: 'US', file: 'honey', index: 1, desc: 'Honey Producing'})
+  const [filter, setFilter] = React.useState<Filter[]>({
+    state: 'US',
+    file: 'honey',
+    index: 1,
+    desc: 'Honey Producing',
+  })
 
   const [year, setYear] = React.useState(defaultYear)
   const yearRef = React.useRef(year)
@@ -65,11 +106,17 @@ export default function App(): JSX.Element {
     setData(
       file.rows.map((row) => {
         const rowYear = row[file.columns.indexOf('Year')]
-        const value = +row[filter.index];
-        return [row[file.columns.indexOf('State')], rowYear, isPercentage? value / 100: value, isPercentage ? 'percent' : '']
+        const value = +row[filter.index]
+        return [
+          row[file.columns.indexOf('State')],
+          rowYear,
+          isPercentage ? value / 100 : value,
+          isPercentage ? 'percent' : '',
+        ]
       })
     )
   }, [filter])
+
   React.useEffect(() => {
     if (!data) return
     let found = false
@@ -87,6 +134,7 @@ export default function App(): JSX.Element {
       setYear(years.sort()[years.length - 1])
     }
   }, [data])
+
   const dataForState = React.useMemo(() => data && data.filter((row) => row[0] === filter.state), [
     data,
   ])
@@ -98,64 +146,75 @@ export default function App(): JSX.Element {
   const [tooltipContent, setTooltipContent] = React.useState('')
 
   return (
-    <main css={container}>
-      <header css={header}>
-        <span aria-label="bee" role="img">
-          🐝 Vis
-        </span>
-      </header>
-      <article css={charts}>
-        <figure>
-          <figcaption>
-            {filter && (
+    <>
+      <Global styles={globalCss} />
+      <main css={container}>
+        <header css={header}>
+          <span aria-label="bee" role="img">
+            🐝 Vis
+          </span>
+        </header>
+        <aside css={filters}>
+          <Filters filter={filter} setFilter={setFilter} />
+        </aside>
+        <article css={charts}>
+          <figure css={lineCharts}>
+            <figcaption>
+              {filter && (
+                <>
+                  {filter.desc} by Year for{' '}
+                  <select value={filter.state} onChange={onChangeState}>
+                    <option value="US">US</option>
+                    {states.map(
+                      (state) =>
+                        state !== 'US' && (
+                          <option key={state} value={state}>
+                            {state}
+                          </option>
+                        )
+                    )}
+                  </select>
+                </>
+              )}
+            </figcaption>
+            {data && <LineChart setYear={setYear} filter={filter} data={dataForState} />}
+          </figure>
+          <figure css={mapChart}>
+            <figcaption>
+              {filter && (
+                <>
+                  {filter.desc} by State for {year}
+                </>
+              )}
+            </figcaption>
+            {data && (
               <>
-                {filter.desc} by Year for{' '}
-                <select value={filter.state} onChange={onChangeState}>
-                  <option value="US">US</option>
-                  {states.map(
-                    (state) =>
-                      state !== 'US' && (
-                        <option key={state} value={state}>
-                          {state}
-                        </option>
-                      )
-                  )}
-                </select>
+                <MapChart
+                  setTooltipContent={setTooltipContent}
+                  filter={filter}
+                  data={dataForYear}
+                />
+                <ReactTooltip>{tooltipContent}</ReactTooltip>
               </>
             )}
-          </figcaption>
-          {data && <LineChart setYear={setYear} filter={filter} data={dataForState} />}
-        </figure>
-        <figure>
-          <figcaption>
-            {filter && (
-              <>
-                {filter.desc} by State for {year}
-              </>
-            )}
-          </figcaption>
-          {data && (
-            <>
-              <MapChart setTooltipContent={setTooltipContent} filter={filter} data={dataForYear} />
-              <ReactTooltip>{tooltipContent}</ReactTooltip>
-            </>
-          )}
-        </figure>
-      </article>
-      <aside css={filters}>
-        <Filters filter={filter} setFilter={setFilter} />
-      </aside>
-      <footer css={footer}>
-        Data provided by{' '}
-        <a href="https://usda.library.cornell.edu/concern/publications/rn301137d?locale=en">
-          NASS Honey Bee Colonies
-        </a>{' '}
-        and{' '}
-        <a href="https://usda.library.cornell.edu/concern/publications/hd76s004z?locale=en">
-          NASS Honey
-        </a> | <a href="https://github.com/jharwig/nass-bee-vis">Github</a> | <a href="https://www.kaggle.com/jasonharwig/nass-bee-colony-and-honey">Kaggle Dataset</a>
-        <p>A <a href="https://www.kensho.com">Kensho</a> Impactathon Summer 2020 project.</p>
-      </footer>
-    </main>
+          </figure>
+        </article>
+        <footer css={footer}>
+          Data provided by{' '}
+          <a href="https://usda.library.cornell.edu/concern/publications/rn301137d?locale=en">
+            NASS Honey Bee Colonies
+          </a>{' '}
+          and{' '}
+          <a href="https://usda.library.cornell.edu/concern/publications/hd76s004z?locale=en">
+            NASS Honey
+          </a>{' '}
+          | <a href="https://github.com/jharwig/nass-bee-vis">Github</a> |{' '}
+          <a href="https://www.kaggle.com/jasonharwig/nass-bee-colony-and-honey">Kaggle Dataset</a>
+          <p>
+            A <a href="https://www.kensho.com">Kensho</a> Impactathon Summer 2020 project.
+          </p>
+        </footer>
+      </main>
+    </>
   )
 }
