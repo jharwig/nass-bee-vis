@@ -167,6 +167,21 @@ export default function App(): JSX.Element {
   const dataForState = React.useMemo(() => data && data.filter((row) => row[0] === filter.state), [
     data,
   ])
+
+  // TODO: this is the list of series for selection in map
+  const [tableForMap, setTableForMap] = React.useState(0)
+  const selectedTables: {file: string; index: number; desc: string}[] = [
+    {
+      file: filter.file,
+      index: filter.index,
+      desc: filter.desc,
+    },
+  ]
+  if (tableForMap >= selectedTables.length) {
+    setTableForMap(0)
+  }
+
+  // TODO calculate this using the tableForMap index into selectedTables (or filter.tables)
   const dataForYear = React.useMemo(() => data && data.filter((row) => row[1] === year), [
     data,
     year,
@@ -220,7 +235,15 @@ export default function App(): JSX.Element {
             <figcaption>
               {filter && (
                 <>
-                  {filter.desc} by State for {year}
+                  <select
+                    value={tableForMap}
+                    onChange={(event) => setTableForMap(+event.target.value)}
+                  >
+                    {selectedTables.map(({desc}, i) => (
+                      <option value={`${i}`}>{desc}</option>
+                    ))}
+                  </select>{' '}
+                  by State for {year}
                 </>
               )}
             </figcaption>
