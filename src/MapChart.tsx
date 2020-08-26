@@ -12,17 +12,7 @@ import statesJsonMap from './states.json'
 const geoUrl = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
 
 const noDataColor = 'lightgray'
-const baseColor = chromatic.schemeOranges[9][0]
-const scale = scaleLinear([baseColor, chromatic.schemeOranges[9][8]])
-const legend = css(`
-float: right;
-list-style: none;
-li {
-display: inline-block;
-width: 30px;
-height: 10px;
-}
-`)
+const scale = scaleLinear(['#FFF1CC', '#C59108'])
 
 // TODO: Specify that some of these units are x 1000 (Is there a better
 // way of doing this than just multiplying values by 1000?)
@@ -98,16 +88,9 @@ function MapChart({setTooltipContent, filter, data}): JSX.Element {
   if (!filteredData.length) return null
 
   return (
-    <>
-      <ComposableMap data-tip="" key={version} projection="geoAlbersUsa">
-        <Geographies geography={geoUrl}>{states}</Geographies>
-      </ComposableMap>
-      {/*<ul css={legend}>
-        {chromatic.schemeOranges[9].map((color) => (
-          <li key={color} style={{backgroundColor: color}} />
-        ))}
-      </ul>*/}
-    </>
+    <ComposableMap data-tip="" key={version} projection="geoAlbersUsa">
+      <Geographies geography={geoUrl}>{states}</Geographies>
+    </ComposableMap>
   )
 }
 
