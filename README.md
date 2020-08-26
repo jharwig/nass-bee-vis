@@ -38,6 +38,12 @@ Run linter and tsc
 $ npm test
 ```
 
+Deploy
+
+```console
+$ npm run deploy
+```
+
 ## TODOs
 
 * Map & graph need to be clearer about units being used. (The values for some data categories are actually x 1000 -- this isn't mentioned anywhere as of yet.)
