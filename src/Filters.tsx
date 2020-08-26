@@ -12,6 +12,7 @@ interface FiltersProps {
 }
 
 const section = css(`
+min-width: 225px;
 margin-bottom: 1em;
 strong {
 font-variant: small-caps;
