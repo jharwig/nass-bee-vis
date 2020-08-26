@@ -147,6 +147,9 @@ export default function App(): JSX.Element {
       desc: filter.desc,
     },
   ]
+  if (tableForMap >= selectedTables.length) {
+    setTableForMap(0)
+  }
 
   // TODO calculate this using the tableForMap index into selectedTables (or filter.tables)
   const dataForYear = React.useMemo(() => data && data.filter((row) => row[1] === year), [
