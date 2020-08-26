@@ -147,7 +147,10 @@ function parseRow(table: Table, row: string[]): undefined {
     case 'd': {
       // Ignore empty data rows and a hack for 'Other' empty rows
       if (row[2] === '' || row.slice(3).join('').length === 0) return
-      table.rows.push(row.slice(2))
+      // Ignore the first two rows that contain meta info
+      const [state, ...rest] = row.slice(2)
+      // Attempt to create 'cleaner' numbers that have commas removed
+      table.rows.push([state, ...rest.map((datum) => datum.replace(',', ''))])
       return
     }
     case 'u': {
@@ -220,7 +223,7 @@ async function parseCSVs(dir: string): Promise<Table[]> {
 async function generateMergedTableJSON(dir: string): Promise<MergedTable> {
   const tables = await parseCSVs(dir)
 
-  // Use the units of the last table as the standard.
+  // Use the units of the most recent table as the standard.
   const tableUnits = tables[tables.length - 1].columns.map((col) => col.unit)
   const tableColumnNames = tables[tables.length - 1].columns.map((col) =>
     stripFootnoteMarker(col.value)

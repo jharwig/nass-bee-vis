@@ -66,6 +66,7 @@ const charts = css(`
   grid-area: charts;
   display: grid;
   width: 100%;
+  gap: 0 20px;
   grid-template-areas:
     "lineCharts mapChart"
 `)
@@ -74,15 +75,13 @@ const footer = css(
   `grid-area: footer; font-size: 80%; padding: 1em; text-align: center; background: ${BLACK}; color: ${WHITE};`
 )
 
-const lineCharts = css(
-  `grid-area: lineCharts; margin-block-start: 0; margin: 1em 0; overflow: auto; height: 100%;`
-)
+const lineCharts = css(`grid-area: lineCharts; margin-block-start: 0; margin: 1em 0;`)
 const mapChart = css(`grid-area: mapChart; margin: 1em 0;`)
 
 const defaultYear = '2019'
 
 export default function App(): JSX.Element {
-  const [filter, setFilter] = React.useState<Filter[]>({
+  const [filter, setFilter] = React.useState<Filter>({
     state: 'US',
     file: 'honey',
     index: 1,
