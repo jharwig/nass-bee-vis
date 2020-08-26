@@ -25,6 +25,12 @@ display: block;
 margin-bottom: 0.1em;
 `)
 
+const unitsCss = css(`
+float: right;
+color: #535863;
+padding: 0px 20px 0px 0px;
+`)
+
 // const newTables = prevState.tables
 // newTables.push({file: file, index: index, desc: desc})
 // return {state: prevFilter.state, tables: newTables}
@@ -62,10 +68,10 @@ function Filters({filter, setFilter}: FiltersProps): JSX.Element {
     {
       group: 'Colonies',
       items: [
-        {name: 'All', file: 'numbers', index: 1, units: 'colonies'},
-        {name: 'Lost', file: 'numbers', index: 3, units: 'colonies'},
-        {name: 'Renovated', file: 'numbers', index: 6, units: 'colonies'},
-        {name: 'Honey Producing', file: 'honey', index: 1, units: 'colonies'},
+        {name: 'All', file: 'numbers', index: 1, units: '#'},
+        {name: 'Lost', file: 'numbers', index: 3, units: '#'},
+        {name: 'Renovated', file: 'numbers', index: 6, units: '#'},
+        {name: 'Honey Producing', file: 'honey', index: 1, units: '#'},
       ],
     },
     {
@@ -111,6 +117,7 @@ function Filters({filter, setFilter}: FiltersProps): JSX.Element {
                 disabled={filterTypes.length === 2 && !filterTypes.includes(units)}
               />{' '}
               {name}
+              <label css={unitsCss}>{units}</label>
             </label>
           ))}
         </section>
