@@ -176,7 +176,15 @@ export default function App(): JSX.Element {
                 </>
               )}
             </figcaption>
-            {data && <LineChart setYear={setYear} filter={filter} data={dataForState} />}
+            {dataForState && (
+              <LineChart
+                setYear={setYear}
+                data={[dataForState]}
+                altData={[]}
+                altColors="#E29E00"
+                dataColors="#7A86A2"
+              />
+            )}
           </figure>
           <figure css={mapChart}>
             <figcaption>
