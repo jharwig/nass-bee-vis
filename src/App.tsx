@@ -72,6 +72,7 @@ const needsFilter = css`
   height: 100%;
 
   h2 {
+    color: ${BLACK};
     opacity: 0.4;
     font-style: italic;
     text-align: center;
@@ -135,6 +136,12 @@ export default function App(): JSX.Element {
         index: 1,
         desc: 'Honey Producing',
         units: '#',
+      },
+      {
+        desc: 'Yield',
+        file: 'honey',
+        index: 2,
+        units: 'lbs',
       },
     ],
   })
@@ -230,7 +237,7 @@ export default function App(): JSX.Element {
         </aside>
         {filter.tables.length === 0 ? (
           <article css={needsFilter}>
-            <h2>Select a Filter</h2>
+            <h2>Select a Filter…</h2>
           </article>
         ) : (
           <article css={charts}>
