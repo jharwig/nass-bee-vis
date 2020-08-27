@@ -85,8 +85,6 @@ function MapChart({setTooltipContent, filter, data}): JSX.Element {
     ReactTooltip.rebuild()
   })
 
-  if (!filteredData.length) return null
-
   return (
     <ComposableMap data-tip="" key={version} projection="geoAlbersUsa">
       <Geographies geography={geoUrl}>{states}</Geographies>

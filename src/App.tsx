@@ -215,11 +215,17 @@ export default function App(): JSX.Element {
     setTableForMap(0)
   }
 
-  const dataForYear = React.useMemo(() => data?.[tableForMap]?.filter((row) => row[1] === year), [
-    data,
-    year,
-    tableForMap,
-  ])
+  const dataForYear = React.useMemo(
+    () =>
+      year &&
+      data?.[tableForMap]?.filter((row) => {
+        if (row[1].includes('-') && year.includes('-')) {
+          return row[1] === year
+        }
+        return row[1].replace(/-.*$/, '') === year.replace(/-.*$/, '')
+      }),
+    [data, year, tableForMap]
+  )
 
   const [tooltipContent, setTooltipContent] = React.useState('')
 
