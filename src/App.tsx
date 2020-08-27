@@ -171,9 +171,9 @@ export default function App(): JSX.Element {
     if (!data) return
     let found = false
     const years = []
-    for (const table in data) {
-      for (const row in table) {
-        const yearInRow = data[table][row][1]
+    for (let t = 0; t < data.length; t += 1) {
+      for (let r = 0; r < data[t].length; r += 1) {
+        const yearInRow = data[t][r][1]
         if (yearInRow === yearRef.current) {
           found = true
           break
