@@ -39,18 +39,7 @@ const label = css`
   }
 `
 
-const unitsCss = css(`
-float: right;
-color: #535863;
-padding: 0px 20px 0px 0px;
-`)
-
-// const newTables = prevState.tables
-// newTables.push({file: file, index: index, desc: desc})
-// return {state: prevFilter.state, tables: newTables}
-
 function Filters({filter, setFilter}: FiltersProps): JSX.Element {
-  const [filterTypes, setFilterTypes] = React.useState([])
   const onChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const {checked} = event.target
     const {file, index, desc, units} = event.target.dataset
