@@ -105,14 +105,14 @@ function LineChart({
     if (!altData?.length || !altDomain) return undefined
 
     return {
-      tickFormat: (f: number) =>
-        valueTickFormat(altData[0][0][3] === '%')(
-          Math.round(
-            ((f - mainDomain.min) / (mainDomain.max - mainDomain.min)) *
-              (altDomain.max - altDomain.min) +
-              altDomain.min
-          )
-        ),
+      tickFormat: (f: number) => {
+        const isPercentage = altData[0][0][3] === '%'
+        const value =
+          ((f - mainDomain.min) / (mainDomain.max - mainDomain.min)) *
+            (altDomain.max - altDomain.min) +
+          altDomain.min
+        return valueTickFormat(isPercentage)(isPercentage ? value : Math.round(value))
+      },
       data: altData.map((rows) =>
         rows.map((column) => {
           const d: Row = [...column]
