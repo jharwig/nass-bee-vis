@@ -6,7 +6,7 @@
   "scripts": {
     "start": "webpack-dev-server",
     "build": "rm -rf dist && webpack --env production",
-    "deploy": "gh-pages -d dist -o origin",
+    "deploy": "npm run build && gh-pages -d dist -o origin",
     "test": "tsc && eslint --ext=tsx .",
     "fix": "eslint --ext=tsx --fix .",
     "serve": "serve -s",

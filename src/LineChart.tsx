@@ -7,8 +7,8 @@ import {
   VictoryStyleInterface,
 } from 'victory'
 
-type Row = [string, string, number, 'percent' | '']
-type Table = Row[]
+export type Row = [string, string, number, '%' | '#' | 'lbs' | '$']
+export type Table = Row[]
 type Domain = {min: number; max: number; firstYear: number; lastYear: number; usesQuarters: boolean}
 type TickFormat = (n: number) => string
 
@@ -19,6 +19,14 @@ const dateForYearField = (d: Row): Date => {
     return new Date(+year, month[quarter], 1)
   }
   return new Date(+year, 0, 1)
+}
+
+const valueTickFormat = (isPercentage: boolean) => (f: number): string => {
+  if (isPercentage) return `${Math.round(f * 100)}%`
+  if (f > 5000) {
+    return `${Math.round(f / 1000)}k`
+  }
+  return `${f}`
 }
 
 function lineStyleForIndex(
@@ -97,12 +105,14 @@ function LineChart({
     if (!altData?.length || !altDomain) return undefined
 
     return {
-      tickFormat: (f: number) =>
-        `${Math.round(
+      tickFormat: (f: number) => {
+        const isPercentage = altData[0][0][3] === '%'
+        const value =
           ((f - mainDomain.min) / (mainDomain.max - mainDomain.min)) *
             (altDomain.max - altDomain.min) +
-            altDomain.min
-        )}`,
+          altDomain.min
+        return valueTickFormat(isPercentage)(isPercentage ? value : Math.round(value))
+      },
       data: altData.map((rows) =>
         rows.map((column) => {
           const d: Row = [...column]
@@ -116,7 +126,7 @@ function LineChart({
     }
   }, [altData, altDomain, mainDomain])
 
-  const isPercentage = data && data[0] && data[0][0][3] === 'percent'
+  const isPercentage = data && data[0] && data[0][0][3] === '%'
   const padding = {top: 10, right: 50, bottom: 30, left: 50}
   return (
     <div ref={ref} style={{height: '100%'}}>
@@ -164,13 +174,7 @@ function LineChart({
             scale={{x: 'time', y: 'linear'}}
             dependentAxis
             style={{axis: {stroke: dataColors}, tickLabels: {fill: dataColors}}}
-            tickFormat={(f) => {
-              if (isPercentage) return `${Math.round(f * 100)}%`
-              if (f > 5000) {
-                return `${Math.round(f / 1000)}k`
-              }
-              return f
-            }}
+            tickFormat={valueTickFormat(isPercentage)}
           />
           {/* Right Axis */}
           {normalizedAltData && (

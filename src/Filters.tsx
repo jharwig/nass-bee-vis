@@ -8,23 +8,36 @@ export interface Filter {
 
 interface FiltersProps {
   filter: Filter
-  setFilter: React.SetStateAction<Filter>
+  setFilter: React.Dispatch<React.SetStateAction<Filter>>
 }
 
-const section = css(`
-min-width: 225px;
-margin-bottom: 1em;
-strong {
-font-variant: small-caps;
-text-transform: lowercase;
-opacity: 0.5
-}
-`)
+const section = css`
+  margin-bottom: 1em;
+  strong {
+    font-variant: small-caps;
+    text-transform: lowercase;
+    opacity: 0.5;
+  }
+`
 
-const label = css(`
-display: block;
-margin-bottom: 0.1em;
-`)
+const label = css`
+  display: block;
+  margin-bottom: 0.1em;
+  display: flex;
+  align-items: center;
+  span.desc {
+    flex: 1 1 100%;
+    padding-right: 5px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  span.unit {
+    color: #535863;
+    padding: 0px 10px 0px 0px;
+    font-size: 9pt;
+  }
+`
 
 const unitsCss = css(`
 float: right;
@@ -41,29 +54,29 @@ function Filters({filter, setFilter}: FiltersProps): JSX.Element {
   const onChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const {checked} = event.target
     const {file, index, desc, units} = event.target.dataset
-    if (file && index) {
+    if (file && index && desc && units) {
       setFilter((prevFilter) => {
-        const newTables = prevFilter.tables
+        const newTables = [...prevFilter.tables]
         if (checked) {
-          newTables.push({file, index, desc, units})
-          if (!filterTypes.includes(units)) {
-            filterTypes.push(units)
-          }
+          newTables.push({file, index: +index, desc, units})
         } else {
-          if (newTables.filter((table) => table.units === units).length === 1) {
-            filterTypes.splice(filterTypes.indexOf(units), 1)
-          }
-          for (let i = 0; i < newTables.length; i++) {
-            if (newTables[i].desc === desc) {
-              newTables.splice(i, 1)
-              break
-            }
+          const removeIndex = newTables.findIndex((t) => t.desc === desc)
+          if (removeIndex >= 0) {
+            newTables.splice(removeIndex, 1)
           }
         }
-        return {state: prevFilter.state, tables: newTables}
+        return {...prevFilter, tables: newTables}
       })
     }
   }
+  const filterTypes: {[key: string]: boolean} = React.useMemo(() => {
+    const units: {[key: string]: boolean} = {}
+    filter.tables.forEach((t) => {
+      units[t.units] = true
+    })
+    return units
+  }, [filter.tables])
+  const canAddFilterTypes = Object.keys(filterTypes).length < 2
 
   const filterDefs = [
     {
@@ -115,10 +128,10 @@ function Filters({filter, setFilter}: FiltersProps): JSX.Element {
                 data-file={file}
                 data-index={index}
                 data-units={units}
-                disabled={filterTypes.length === 2 && !filterTypes.includes(units)}
+                disabled={!canAddFilterTypes && !filterTypes[units]}
               />{' '}
-              {name}
-              <label css={unitsCss}>{units}</label>
+              <span className="desc">{name}</span>
+              <span className="unit">{units}</span>
             </label>
           ))}
         </section>

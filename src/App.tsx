@@ -6,7 +6,7 @@ import honey from '../merged-data/honey.json'
 import numbers from '../merged-data/numbers.json'
 import stressors from '../merged-data/stressors.json'
 
-import LineChart from './LineChart'
+import LineChart, {Table, Row} from './LineChart'
 import MapChart from './MapChart'
 import Filters, {Filter} from './Filters'
 
@@ -14,7 +14,7 @@ const YELLOW = '#F9C846'
 const BLACK = '#545863'
 const WHITE = '#F7F5FB'
 
-const files = {
+const files: {[key: string]: {rows: Row[]; columns: string[]}} = {
   honey,
   numbers,
   stressors,
@@ -66,6 +66,23 @@ const header = css`
   color: ${WHITE};
   padding: 1em;
 `
+const needsFilter = css`
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  h2 {
+    color: ${BLACK};
+    opacity: 0.4;
+    font-style: italic;
+    text-align: center;
+    transform: translate(0, -50%);
+    top: 50%;
+    margin: 0;
+    position: relative;
+  }
+`
+
 const charts = css`
   grid-area: charts;
   display: grid;
@@ -113,9 +130,20 @@ const defaultYear = '2019'
 export default function App(): JSX.Element {
   const [filter, setFilter] = React.useState<Filter>({
     state: 'US',
-    file: 'honey',
-    index: 1,
-    desc: 'Honey Producing',
+    tables: [
+      {
+        file: 'honey',
+        index: 1,
+        desc: 'Honey Producing',
+        units: '#',
+      },
+      {
+        desc: 'Yield',
+        file: 'honey',
+        index: 2,
+        units: 'lbs',
+      },
+    ],
   })
 
   const [year, setYear] = React.useState(defaultYear)
@@ -125,66 +153,72 @@ export default function App(): JSX.Element {
   }, [year])
 
   const onChangeState = (event: React.ChangeEvent<HTMLSelectElement>): void => {
-    setFilter((filter) => ({...filter, state: event.target.value}))
+    setFilter((prevFilter) => ({...prevFilter, state: event.target.value}))
   }
 
-  const [data, setData] = React.useState()
-  React.useEffect(() => {
-    const file = files[filter.file]
-    const isPercentage = filter.file === 'stressors'
-    setData(
-      file.rows.map((row) => {
-        const rowYear = row[file.columns.indexOf('Year')]
-        const value = +row[filter.index]
-        return [
-          row[file.columns.indexOf('State')],
-          rowYear,
-          isPercentage ? value / 100 : value,
-          isPercentage ? 'percent' : '',
-        ]
-      })
-    )
-  }, [filter])
+  const data: Table[] = React.useMemo(
+    () =>
+      filter.tables.map((table) => {
+        const file = files[table.file]
+        return file.rows.map((row) => {
+          const rowYear = row[file.columns.indexOf('Year')]
+          const value = +row[table.index]
+          return [
+            `${row[file.columns.indexOf('State')]}`,
+            `${rowYear}`,
+            table.units === '%' ? value / 100 : value,
+            table.units as Row['3'],
+          ]
+        })
+      }),
+    [filter.tables]
+  )
 
   React.useEffect(() => {
     if (!data) return
     let found = false
-    const latestYear = 0
     const years = []
-    for (const row in data) {
-      const year = data[row][1]
-      if (year === yearRef.current) {
-        found = true
-        break
+    for (let t = 0; t < data.length; t += 1) {
+      for (let r = 0; r < data[t].length; r += 1) {
+        const yearInRow = data[t][r][1]
+        if (yearInRow === yearRef.current) {
+          found = true
+          break
+        }
+        years.push(yearInRow)
       }
-      years.push(year)
     }
     if (!found) {
       setYear(years.sort()[years.length - 1])
     }
   }, [data])
 
-  const dataForState = React.useMemo(() => data && data.filter((row) => row[0] === filter.state), [
-    data,
-  ])
+  const dataForState = React.useMemo(() => {
+    if (!data?.length) return undefined
+    const leftAxis: Row[][] = []
+    const rightAxis: Row[][] = []
+    let leftUnits: string
+    filter.tables.forEach((filterTable, i) => {
+      const tableRows: Row[] = data[i].filter((row) => row[0] === filter.state)
+      if (!leftAxis.length || leftUnits === filterTable.units) {
+        leftAxis.push(tableRows)
+        leftUnits = filterTable.units
+      } else {
+        rightAxis.push(tableRows)
+      }
+    })
+    return {leftAxis, rightAxis}
+  }, [filter, data])
 
-  // TODO: this is the list of series for selection in map
   const [tableForMap, setTableForMap] = React.useState(0)
-  const selectedTables: {file: string; index: number; desc: string}[] = [
-    {
-      file: filter.file,
-      index: filter.index,
-      desc: filter.desc,
-    },
-  ]
-  if (tableForMap >= selectedTables.length) {
+  if (tableForMap && tableForMap >= filter.tables.length) {
     setTableForMap(0)
   }
 
-  // TODO calculate this using the tableForMap index into selectedTables (or filter.tables)
-  const dataForYear = React.useMemo(() => data && data.filter((row) => row[1] === year), [
+  const dataForYear = React.useMemo(() => data?.[tableForMap]?.filter((row) => row[1] === year), [
     data,
     year,
+    tableForMap,
   ])
 
   const [tooltipContent, setTooltipContent] = React.useState('')
@@ -201,66 +235,72 @@ export default function App(): JSX.Element {
         <aside css={filters}>
           <Filters filter={filter} setFilter={setFilter} />
         </aside>
-        <article css={charts}>
-          <figure css={lineCharts}>
-            <figcaption>
-              {filter && (
-                <>
-                  {filter.desc} by Year for{' '}
-                  <select value={filter.state} onChange={onChangeState}>
-                    <option value="US">US</option>
-                    {states.map(
-                      (state) =>
-                        state !== 'US' && (
-                          <option key={state} value={state}>
-                            {state}
-                          </option>
-                        )
-                    )}
-                  </select>
-                </>
-              )}
-            </figcaption>
-            {dataForState && (
-              <LineChart
-                setYear={setYear}
-                data={[dataForState]}
-                altData={[]}
-                altColors="#E29E00"
-                dataColors="#7A86A2"
-              />
-            )}
-          </figure>
-          <figure css={mapChart}>
-            <figcaption>
-              {filter && (
-                <>
-                  <select
-                    value={tableForMap}
-                    onChange={(event) => setTableForMap(+event.target.value)}
-                  >
-                    {selectedTables.map(({desc}, i) => (
-                      <option key={desc} value={`${i}`}>
-                        {desc}
-                      </option>
-                    ))}
-                  </select>{' '}
-                  by State for {year}
-                </>
-              )}
-            </figcaption>
-            {data && (
-              <>
-                <MapChart
-                  setTooltipContent={setTooltipContent}
-                  filter={filter}
-                  data={dataForYear}
+        {filter.tables.length === 0 ? (
+          <article css={needsFilter}>
+            <h2>Select a Filter…</h2>
+          </article>
+        ) : (
+          <article css={charts}>
+            <figure css={lineCharts}>
+              <figcaption>
+                {filter && (
+                  <>
+                    {filter.tables.map((t) => t.desc).join(',')} by Year for{' '}
+                    <select value={filter.state} onChange={onChangeState}>
+                      <option value="US">US</option>
+                      {states.map(
+                        (state) =>
+                          state !== 'US' && (
+                            <option key={state} value={state}>
+                              {state}
+                            </option>
+                          )
+                      )}
+                    </select>
+                  </>
+                )}
+              </figcaption>
+              {dataForState && (
+                <LineChart
+                  setYear={setYear}
+                  data={dataForState.leftAxis}
+                  altData={dataForState.rightAxis}
+                  altColors="#E29E00"
+                  dataColors="#7A86A2"
                 />
-                <ReactTooltip>{tooltipContent}</ReactTooltip>
-              </>
-            )}
-          </figure>
-        </article>
+              )}
+            </figure>
+            <figure css={mapChart}>
+              <figcaption>
+                {filter && (
+                  <>
+                    <select
+                      value={tableForMap}
+                      onChange={(event) => setTableForMap(+event.target.value)}
+                    >
+                      {filter.tables.map(({desc}, i) => (
+                        <option key={desc} value={`${i}`}>
+                          {desc}
+                        </option>
+                      ))}
+                    </select>{' '}
+                    by State for {year}
+                  </>
+                )}
+              </figcaption>
+              {dataForYear && (
+                <>
+                  <MapChart
+                    setTooltipContent={setTooltipContent}
+                    filter={filter}
+                    data={dataForYear}
+                  />
+                  <ReactTooltip>{tooltipContent}</ReactTooltip>
+                </>
+              )}
+            </figure>
+          </article>
+        )}
         <footer css={footer}>
           Data provided by{' '}
           <a href="https://usda.library.cornell.edu/concern/publications/rn301137d?locale=en">
