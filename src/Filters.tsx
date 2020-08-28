@@ -6,6 +6,39 @@ export interface Filter {
   tables: {file: string; index: number; desc: string; units: string}[]
 }
 
+export const FilterDefs = [
+  {
+    group: 'Colonies',
+    items: [
+      {desc: 'All', file: 'numbers', index: 1, units: '#'},
+      {desc: 'Lost', file: 'numbers', index: 3, units: '#'},
+      {desc: 'Renovated', file: 'numbers', index: 6, units: '#'},
+      {desc: 'Honey Producing', file: 'honey', index: 1, units: '#'},
+    ],
+  },
+  {
+    group: 'Honey',
+    items: [
+      {desc: 'Yield / Colony', file: 'honey', index: 2, units: 'lbs'},
+      {desc: 'Production', file: 'honey', index: 3, units: 'lbs'},
+      {desc: 'Stocks', file: 'honey', index: 4, units: 'lbs'},
+      {desc: 'Price / Pound', file: 'honey', index: 5, units: '$'},
+      {desc: 'Value of Production', file: 'honey', index: 6, units: '$'},
+    ],
+  },
+  {
+    group: 'Stressors',
+    items: [
+      {desc: 'Varroa mites', file: 'stressors', index: 1, units: '%'},
+      {desc: 'Other Pests', file: 'stressors', index: 2, units: '%'},
+      {desc: 'Diseases', file: 'stressors', index: 3, units: '%'},
+      {desc: 'Pesticides', file: 'stressors', index: 4, units: '%'},
+      {desc: 'Other', file: 'stressors', index: 5, units: '%'},
+      {desc: 'Unknown', file: 'stressors', index: 6, units: '%'},
+    ],
+  },
+]
+
 interface FiltersProps {
   filter: Filter
   setFilter: React.Dispatch<React.SetStateAction<Filter>>
@@ -67,59 +100,27 @@ function Filters({filter, setFilter}: FiltersProps): JSX.Element {
   }, [filter.tables])
   const canAddFilterTypes = Object.keys(filterTypes).length < 2
 
-  const filterDefs = [
-    {
-      group: 'Colonies',
-      items: [
-        {name: 'All', file: 'numbers', index: 1, units: '#'},
-        {name: 'Lost', file: 'numbers', index: 3, units: '#'},
-        {name: 'Renovated', file: 'numbers', index: 6, units: '#'},
-        {name: 'Honey Producing', file: 'honey', index: 1, units: '#'},
-      ],
-    },
-    {
-      group: 'Honey',
-      items: [
-        {name: 'Yield', file: 'honey', index: 2, units: 'lbs'},
-        {name: 'Production', file: 'honey', index: 3, units: 'lbs'},
-        {name: 'Stocks', file: 'honey', index: 4, units: 'lbs'},
-        {name: 'Price / Pound', file: 'honey', index: 5, units: '$'},
-        {name: 'Value of Production', file: 'honey', index: 6, units: '$'},
-      ],
-    },
-    {
-      group: 'Stressors',
-      items: [
-        {name: 'Varroa mites', file: 'stressors', index: 1, units: '%'},
-        {name: 'Other Pests', file: 'stressors', index: 2, units: '%'},
-        {name: 'Diseases', file: 'stressors', index: 3, units: '%'},
-        {name: 'Pesticides', file: 'stressors', index: 4, units: '%'},
-        {name: 'Other', file: 'stressors', index: 5, units: '%'},
-        {name: 'Unknown', file: 'stressors', index: 6, units: '%'},
-      ],
-    },
-  ]
   return (
     <>
-      {filterDefs.map(({group, items}) => (
+      {FilterDefs.map(({group, items}) => (
         <section css={section} key={group}>
           <strong>{group}</strong>
-          {items.map(({file, index, name, units}) => (
+          {items.map(({file, index, desc, units}) => (
             <label key={file + index} css={label}>
               <input
                 type="checkbox"
                 name="column"
                 onChange={onChange}
                 checked={
-                  filter.tables && filter.tables.filter((table) => table.desc === name).length === 1
+                  filter.tables && filter.tables.filter((table) => table.desc === desc).length === 1
                 }
-                data-desc={name}
+                data-desc={desc}
                 data-file={file}
                 data-index={index}
                 data-units={units}
                 disabled={!canAddFilterTypes && !filterTypes[units]}
               />{' '}
-              <span className="desc">{name}</span>
+              <span className="desc">{desc}</span>
               <span className="unit">{units}</span>
             </label>
           ))}

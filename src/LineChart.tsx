@@ -23,6 +23,9 @@ const dateForYearField = (d: Row): Date => {
 
 const valueTickFormat = (isPercentage: boolean) => (f: number): string => {
   if (isPercentage) return `${Math.round(f * 100)}%`
+  if (f > 5000000) {
+    return `${Math.round(f / 1000000)}m`
+  }
   if (f > 5000) {
     return `${Math.round(f / 1000)}k`
   }
@@ -127,7 +130,7 @@ function LineChart({
   }, [altData, altDomain, mainDomain])
 
   const isPercentage = data && data[0] && data[0][0][3] === '%'
-  const padding = {top: 10, right: 50, bottom: 30, left: 50}
+  const padding = {top: 10, right: 70, bottom: 30, left: 50}
   const usesQuarters = mainDomain.usesQuarters || altDomain.usesQuarters
   const lastYear = Math.max(mainDomain.lastYear, altDomain.lastYear)
   return (
