@@ -1,81 +1,87 @@
-import React, {useState, useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {ComposableMap, Geographies, Geography} from 'react-simple-maps'
-import {scaleLinear, scaleOrdinal} from 'd3-scale'
-import {css} from '@emotion/core'
-import * as chromatic from 'd3-scale-chromatic'
+import {scaleLinear} from 'd3-scale'
 import {extent} from 'd3-array'
 import ReactTooltip from 'react-tooltip'
 
 import {Filter} from './Filters'
+import {Table, Row} from './LineChart'
 import statesJsonMap from './states.json'
 
 const geoUrl = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
 
-const noDataColor = 'lightgray'
-const scale = scaleLinear(['#FFF1CC', '#C59108'])
+const colorScale = scaleLinear(['#FFF1CC', '#C59108'])
+const NoData = {color: 'lightgray', tooltip: 'No Data'}
 
-// TODO: Specify that some of these units are x 1000 (Is there a better
-// way of doing this than just multiplying values by 1000?)
-function format(value: number, filter: Filter): string {
-  const {file, index, desc} = filter
+function format(value: number, filter: Filter['tables'][0]): string {
+  const {units} = filter
   const formattedValue = value.toLocaleString()
-  if (file === 'numbers' || desc === 'Honey Producing') {
-    return `${formattedValue} colonies` // x 1000
+
+  if (units === '#') {
+    return `${formattedValue} colonies`
   }
-  if (file === 'stressors') {
+  if (units === '%') {
     return `${formattedValue}%`
   }
-  if (desc === 'Production' || desc === 'Stocks') {
-    return `${formattedValue} lbs` // x 1000
-  }
-  if (desc === 'Yield') {
+  if (units === 'lbs') {
     return `${formattedValue} lbs`
   }
-  if (desc === 'Value of Production') {
-    return `$${formattedValue}` // x 1000
+  if (units === '$') {
+    return `$${formattedValue}`
   }
-  return `$${formattedValue}`
+  return formattedValue
+}
+
+function includeRow(row: Row): boolean {
+  return !['other', 'US'].includes(row[0])
+}
+
+interface MapChartProps {
+  data: Table
+  filter: Filter['tables'][0]
+  setTooltipContent: (content: string) => void
 }
 
 // Original example is here: https://www.react-simple-maps.io/examples/usa-counties-choropleth-quantize/
-function MapChart({setTooltipContent, filter, data}): JSX.Element {
-  const [filteredData, setFilteredData] = useState([])
+function MapChart({setTooltipContent, filter, data}: MapChartProps): JSX.Element {
+  const dataByGeoName: {[key: string]: {tooltip: string; color: string}} = React.useMemo(() => {
+    if (!data.length) return data
+    const e = extent(data, (d) => (includeRow(d) ? d[2] : undefined))
+    colorScale.domain(e)
 
-  useEffect(() => {
-    setFilteredData(data.filter((d) => !['other', 'US'].includes(d[0])))
-  }, [data])
-
-  const [version, setVersion] = useState(1)
-  useEffect(() => {
-    if (!filteredData.length) return
-    scale.domain(extent(filteredData, (d) => d[2]))
-  }, [filteredData])
-
-  useEffect(() => {
-    setVersion((v) => v + 1)
-  }, [filter])
+    return data.reduce((memo, row) => {
+      if (includeRow(row)) {
+        const tooltip = !Number.isNaN(row[2]) ? format(row[2], filter) : NoData.tooltip
+        const color = !isNaN(row[2]) ? colorScale(row[2]) : NoData.color
+        memo[statesJsonMap[row[0]]] = {
+          tooltip,
+          color,
+        }
+      }
+      return memo
+    }, {})
+  }, [data, filter])
 
   const states = React.useCallback(
     ({geographies}) =>
       geographies.map((geo) => {
-        const cur = filteredData.find((d) => statesJsonMap[d[0]] === geo.properties.name)
-        // Some values from cur[2] are NaN, filtering this here for now
+        const {tooltip, color} = dataByGeoName[geo.properties.name] ?? NoData
         return (
           <Geography
             onMouseEnter={() => {
-              setTooltipContent(cur && !Number.isNaN(cur[2]) ? format(cur[2], filter) : 'No Data')
+              setTooltipContent(tooltip)
             }}
             onMouseLeave={() => {
               setTooltipContent('')
             }}
-            key={geo.rsmKey}
+            key={`${geo.rsmKey}-${tooltip}-${color}`}
             stroke="#FFF"
             geography={geo}
-            fill={cur && !isNaN(cur[2]) ? scale(cur[2]) : noDataColor}
+            fill={color}
           />
         )
       }),
-    [filteredData, setTooltipContent, filter]
+    [dataByGeoName, setTooltipContent]
   )
 
   // Because of returning null below, react-tooltip may lose track
@@ -85,10 +91,8 @@ function MapChart({setTooltipContent, filter, data}): JSX.Element {
     ReactTooltip.rebuild()
   })
 
-  if (!filteredData.length) return null
-
   return (
-    <ComposableMap data-tip="" key={version} projection="geoAlbersUsa">
+    <ComposableMap data-tip="" projection="geoAlbersUsa">
       <Geographies geography={geoUrl}>{states}</Geographies>
     </ComposableMap>
   )

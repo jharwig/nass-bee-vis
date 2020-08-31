@@ -8,7 +8,7 @@ import stressors from '../merged-data/stressors.json'
 
 import LineChart, {Table, Row, lineStyleForIndex} from './LineChart'
 import MapChart from './MapChart'
-import Filters, {Filter, Legend} from './Filters'
+import Filters, {Filter, FilterDefs, Legend} from './Filters'
 
 const YELLOW = '#F9C846'
 const BLACK = '#545863'
@@ -133,20 +133,7 @@ const defaultYear = '2019'
 export default function App(): JSX.Element {
   const [filter, setFilter] = React.useState<Filter>({
     state: 'US',
-    tables: [
-      {
-        file: 'honey',
-        index: 1,
-        desc: 'Honey Producing',
-        units: '#',
-      },
-      {
-        desc: 'Yield',
-        file: 'honey',
-        index: 2,
-        units: 'lbs',
-      },
-    ],
+    tables: [FilterDefs[0].items[3], FilterDefs[1].items[0]],
   })
 
   const [year, setYear] = React.useState(defaultYear)
@@ -163,13 +150,27 @@ export default function App(): JSX.Element {
     () =>
       filter.tables.map((table) => {
         const file = files[table.file]
+        const transform = (value: number): number => {
+          const {index, units} = table
+          if (units === '%') return value / 100
+          // Some honey columns are in 1000 lbs
+          if (
+            table.file === 'honey' &&
+            (index === 1 || index === 3 || index === 4 || index === 6)
+          ) {
+            return value * 1000
+          }
+
+          return value
+        }
         return file.rows.map((row) => {
           const rowYear = row[file.columns.indexOf('Year')]
-          const value = +row[table.index]
+          const value = transform(+row[table.index])
+
           return [
             `${row[file.columns.indexOf('State')]}`,
             `${rowYear}`,
-            table.units === '%' ? value / 100 : value,
+            value,
             table.units as Row['3'],
           ]
         })
@@ -227,11 +228,17 @@ export default function App(): JSX.Element {
     setTableForMap(0)
   }
 
-  const dataForYear = React.useMemo(() => data?.[tableForMap]?.filter((row) => row[1] === year), [
-    data,
-    year,
-    tableForMap,
-  ])
+  const dataForYear = React.useMemo(
+    () =>
+      year &&
+      data?.[tableForMap]?.filter((row) => {
+        if (row[1].includes('-') && year.includes('-')) {
+          return row[1] === year
+        }
+        return row[1].replace(/-.*$/, '') === year.replace(/-.*$/, '')
+      }),
+    [data, year, tableForMap]
+  )
 
   const [tooltipContent, setTooltipContent] = React.useState('')
 
@@ -304,7 +311,7 @@ export default function App(): JSX.Element {
                 <>
                   <MapChart
                     setTooltipContent={setTooltipContent}
-                    filter={filter}
+                    filter={filter.tables[tableForMap]}
                     data={dataForYear}
                   />
                   <ReactTooltip>{tooltipContent}</ReactTooltip>

@@ -23,6 +23,9 @@ const dateForYearField = (d: Row): Date => {
 
 const valueTickFormat = (isPercentage: boolean) => (f: number): string => {
   if (isPercentage) return `${Math.round(f * 100)}%`
+  if (f > 5000000) {
+    return `${Math.round(f / 1000000)}m`
+  }
   if (f > 5000) {
     return `${Math.round(f / 1000)}k`
   }
@@ -127,12 +130,14 @@ function LineChart({
   }, [altData, altDomain, mainDomain])
 
   const isPercentage = data && data[0] && data[0][0][3] === '%'
-  const padding = {top: 10, right: 50, bottom: 30, left: 50}
+  const padding = {top: 10, right: 70, bottom: 30, left: 50}
+  const usesQuarters = mainDomain.usesQuarters || altDomain.usesQuarters
+  const lastYear = Math.max(mainDomain.lastYear, altDomain.lastYear)
   return (
     <div ref={ref} style={{height: '100%'}}>
       {size && size.width && size.height && (
         <VictoryChart
-          key={`${mainDomain.usesQuarters}${mainDomain.lastYear}`}
+          key={`${usesQuarters}${lastYear}`}
           padding={padding}
           width={size.width || undefined}
           height={size.height || undefined}
@@ -143,12 +148,12 @@ function LineChart({
               allowResize={false}
               brushStyle={{stroke: 'transparent', fill: 'black', fillOpacity: 0.1}}
               brushDomain={{
-                x: mainDomain.usesQuarters
-                  ? [new Date(mainDomain.lastYear - 1, 10, 1), new Date(mainDomain.lastYear, 0, 1)]
-                  : [new Date(mainDomain.lastYear - 1, 1, 1), new Date(mainDomain.lastYear, 0, 1)],
+                x: usesQuarters
+                  ? [new Date(lastYear - 1, 10, 1), new Date(lastYear, 0, 1)]
+                  : [new Date(lastYear - 1, 1, 1), new Date(lastYear, 0, 1)],
               }}
               onBrushDomainChange={(domain) => {
-                if (mainDomain.usesQuarters) {
+                if (usesQuarters) {
                   const middle = new Date(
                     (domain.x[1].getTime() - domain.x[0].getTime()) / 2 + domain.x[0].getTime()
                   )
