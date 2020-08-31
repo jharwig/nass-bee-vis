@@ -29,7 +29,7 @@ const valueTickFormat = (isPercentage: boolean) => (f: number): string => {
   return `${f}`
 }
 
-function lineStyleForIndex(
+export function lineStyleForIndex(
   i: number,
   color: string
 ): VictoryStyleInterface /* VictoryLine['props']['style'] */ {
@@ -134,8 +134,8 @@ function LineChart({
         <VictoryChart
           key={`${mainDomain.usesQuarters}${mainDomain.lastYear}`}
           padding={padding}
-          width={size.width}
-          height={size.height}
+          width={size.width || undefined}
+          height={size.height || undefined}
           containerComponent={
             <VictoryBrushContainer
               defaultBrushArea="move"
