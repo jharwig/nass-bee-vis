@@ -6,13 +6,16 @@ import honey from '../merged-data/honey.json'
 import numbers from '../merged-data/numbers.json'
 import stressors from '../merged-data/stressors.json'
 
-import LineChart, {Table, Row} from './LineChart'
+import LineChart, {Table, Row, lineStyleForIndex} from './LineChart'
 import MapChart from './MapChart'
-import Filters, {Filter, FilterDefs} from './Filters'
+import Filters, {Filter, FilterDefs, Legend} from './Filters'
 
 const YELLOW = '#F9C846'
 const BLACK = '#545863'
 const WHITE = '#F7F5FB'
+
+const DATA_COLOR = '#7A86A2'
+const ALT_COLOR = '#E29E00'
 
 const files: {[key: string]: {rows: Row[]; columns: string[]}} = {
   honey,
@@ -198,17 +201,26 @@ export default function App(): JSX.Element {
     if (!data?.length) return undefined
     const leftAxis: Row[][] = []
     const rightAxis: Row[][] = []
+    const legend: Legend = {}
     let leftUnits: string
     filter.tables.forEach((filterTable, i) => {
       const tableRows: Row[] = data[i].filter((row) => row[0] === filter.state)
       if (!leftAxis.length || leftUnits === filterTable.units) {
+        legend[filterTable.file + filterTable.index] = lineStyleForIndex(
+          leftAxis.length,
+          DATA_COLOR
+        ).data
         leftAxis.push(tableRows)
         leftUnits = filterTable.units
       } else {
+        legend[filterTable.file + filterTable.index] = lineStyleForIndex(
+          rightAxis.length,
+          ALT_COLOR
+        ).data
         rightAxis.push(tableRows)
       }
     })
-    return {leftAxis, rightAxis}
+    return {leftAxis, rightAxis, legend}
   }, [filter, data])
 
   const [tableForMap, setTableForMap] = React.useState(0)
@@ -240,7 +252,7 @@ export default function App(): JSX.Element {
           </span>
         </header>
         <aside css={filters}>
-          <Filters filter={filter} setFilter={setFilter} />
+          <Filters filter={filter} setFilter={setFilter} legend={dataForState?.legend} />
         </aside>
         {filter.tables.length === 0 ? (
           <article css={needsFilter}>

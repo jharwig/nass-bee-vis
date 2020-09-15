@@ -6,6 +6,13 @@ export interface Filter {
   tables: {file: string; index: number; desc: string; units: string}[]
 }
 
+interface LegendStyle {
+  stroke: string
+  strokeDasharray?: number[]
+  strokeOpacity?: number
+}
+
+export type Legend = Record<string, LegendStyle>
 export const FilterDefs = [
   {
     group: 'Colonies',
@@ -42,6 +49,7 @@ export const FilterDefs = [
 interface FiltersProps {
   filter: Filter
   setFilter: React.Dispatch<React.SetStateAction<Filter>>
+  legend: Legend | undefined
 }
 
 const section = css`
@@ -70,9 +78,31 @@ const label = css`
     padding: 0px 10px 0px 0px;
     font-size: 9pt;
   }
+  div.legendItem {
+    width: 20px;
+    flex: none;
+    margin-right: 5px;
+  }
 `
 
-function Filters({filter, setFilter}: FiltersProps): JSX.Element {
+function LegendItem({stroke, strokeDasharray, strokeOpacity}: LegendStyle): JSX.Element {
+  // Make the dashed lines easier to see at a smaller scale
+  const dasharray = strokeDasharray?.map((number) => number * 5).join(' ')
+  return (
+    <svg viewBox="0 0 100 100" width="20" height="20">
+      <path
+        strokeWidth="10"
+        fill="none"
+        stroke={stroke}
+        strokeDasharray={dasharray}
+        strokeOpacity={strokeOpacity}
+        d="M 0 70 L 30 10 L 60 90 L 100 40 "
+      />
+    </svg>
+  )
+}
+
+function Filters({filter, setFilter, legend}: FiltersProps): JSX.Element {
   const onChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const {checked} = event.target
     const {file, index, desc, units} = event.target.dataset
@@ -120,8 +150,13 @@ function Filters({filter, setFilter}: FiltersProps): JSX.Element {
                 data-units={units}
                 disabled={!canAddFilterTypes && !filterTypes[units]}
               />{' '}
-              <span className="desc">{desc}</span>
+              <span className="desc" title={desc}>
+                {desc}
+              </span>
               <span className="unit">{units}</span>
+              <div className="legendItem">
+                {legend && legend[file + index] && <LegendItem {...legend[file + index]} />}
+              </div>
             </label>
           ))}
         </section>
