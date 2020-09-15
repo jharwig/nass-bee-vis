@@ -143,7 +143,8 @@ export default function App(): JSX.Element {
   }, [year])
 
   const onChangeState = (event: React.ChangeEvent<HTMLSelectElement>): void => {
-    setFilter((prevFilter) => ({...prevFilter, state: event.target.value}))
+    const {value} = event.currentTarget
+    setFilter((prevFilter) => ({...prevFilter, state: value}))
   }
 
   const data: Table[] = React.useMemo(
