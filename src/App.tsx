@@ -110,6 +110,9 @@ const footer = css`
   text-align: center;
   background: ${BLACK};
   color: ${WHITE};
+  p {
+    margin: 5px 0 0 0;
+  }
 `
 
 const lineCharts = css`
@@ -324,16 +327,27 @@ export default function App(): JSX.Element {
           </article>
         )}
         <footer css={footer}>
-          Data provided by{' '}
-          <a href="https://usda.library.cornell.edu/concern/publications/rn301137d?locale=en">
-            NASS Honey Bee Colonies
-          </a>{' '}
-          and{' '}
-          <a href="https://usda.library.cornell.edu/concern/publications/hd76s004z?locale=en">
-            NASS Honey
-          </a>{' '}
-          | <a href="https://github.com/jharwig/nass-bee-vis">Github</a> |{' '}
-          <a href="https://www.kaggle.com/jasonharwig/nass-bee-colony-and-honey">Kaggle Dataset</a>
+          <p>
+            Data provided by{' '}
+            <a href="https://usda.library.cornell.edu/concern/publications/rn301137d?locale=en">
+              NASS Honey Bee Colonies
+            </a>{' '}
+            and{' '}
+            <a href="https://usda.library.cornell.edu/concern/publications/hd76s004z?locale=en">
+              NASS Honey
+            </a>{' '}
+            | <a href="https://github.com/jharwig/nass-bee-vis">Github</a> |{' '}
+            <a href="https://www.kaggle.com/jasonharwig/nass-bee-colony-and-honey">
+              Kaggle Dataset
+            </a>{' '}
+            |{' '}
+            <a
+              href="https://github.com/jharwig/nass-bee-vis/issues/new"
+              title="Requires a Github account"
+            >
+              Report an Issue
+            </a>
+          </p>
           <p>
             A <a href="https://www.kensho.com">Kensho</a> Impactathon Summer 2020 project.
           </p>
