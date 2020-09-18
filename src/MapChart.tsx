@@ -33,7 +33,7 @@ function format(value: number, filter: Filter['tables'][0]): string {
 }
 
 function includeRow(row: Row): boolean {
-  return !['other', 'US'].includes(row[0])
+  return !['other', 'us'].includes(row[0].toLowerCase())
 }
 
 interface MapChartProps {

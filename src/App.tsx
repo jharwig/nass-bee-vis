@@ -25,7 +25,9 @@ const files: {[key: string]: {rows: Row[]; columns: string[]}} = {
 const states = Object.keys(
   [honey, numbers, stressors].reduce((stateMap, data) => {
     data.rows.forEach((row) => {
-      stateMap[row[0]] = true
+      if (!/other/i.test(row[0])) {
+        stateMap[row[0]] = true
+      }
     })
     return stateMap
   }, {})
