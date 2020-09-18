@@ -130,6 +130,9 @@ const mapChart = css`
     width: 100%;
     height: auto;
     max-height: 100%;
+    path {
+      outline: none;
+    }
   }
 `
 
